@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import Swal from "sweetalert2";
+import { API_CONFIG } from "../../config/api";
 
 const Category = () => {
   const token = localStorage.getItem("token");

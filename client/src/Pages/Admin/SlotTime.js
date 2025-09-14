@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import Swal from "sweetalert2"; // Thêm dòng này ở đầu file
+import { API_CONFIG } from "../../config/api";
 
 const SlotTime = () => {
   const token = localStorage.getItem("token");

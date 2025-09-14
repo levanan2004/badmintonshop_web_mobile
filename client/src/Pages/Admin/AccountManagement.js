@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import Swal from "sweetalert2";
 
-import { API_CONFIG } from "../config/api";
+import { API_CONFIG } from "../../config/api";
 const AccountManagement = () => {
   const token = localStorage.getItem("token");
   if (!token) {

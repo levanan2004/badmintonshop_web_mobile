@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useLocation, useParams, Link } from "react-router-dom";
 import Swal from "sweetalert2";
-import { API_CONFIG } from "../config/api";
+import { API_CONFIG } from "../../config/api";
 
 const DetailAccount = ({ onPasswordChange }) => {
   const token = localStorage.getItem("token");

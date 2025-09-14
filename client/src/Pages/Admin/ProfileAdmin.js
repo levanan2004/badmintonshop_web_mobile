@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { API_CONFIG } from "../../config/api";
 
 const ProfileAdmin = ({ onPasswordChange }) => {
   const token = localStorage.getItem("token");

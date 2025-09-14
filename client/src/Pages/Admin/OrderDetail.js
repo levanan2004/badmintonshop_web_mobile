@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
+import { API_CONFIG } from "../../config/api";
 const { formatDate } = require("../Common");
 
 const OrderDetails = () => {

@@ -8,7 +8,6 @@ import {
 } from "../Component/Slidebar/Slidebar";
 import Slidebar from "../Component/Slidebar/Slidebar";
 import "../Css/Style.css";
-import { API_CONFIG } from "../config/api";
 // Component đồng hồ đếm ngược
 function CountdownTimer({ targetDate }) {
   const calculateTimeLeft = () => {

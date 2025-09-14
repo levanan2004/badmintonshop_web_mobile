@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Link, useParams } from "react-router-dom";
+import { API_CONFIG } from "../../config/api";
 
 const AddProductForm = () => {
   const { id } = useParams();
