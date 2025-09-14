@@ -1,17 +1,17 @@
-import React, { useState, useEffect } from 'react';
-import Swal from 'sweetalert2'; // Thêm dòng này ở đầu file
+import React, { useState, useEffect } from "react";
+import Swal from "sweetalert2"; // Thêm dòng này ở đầu file
 
 const SlotTime = () => {
   const token = localStorage.getItem("token");
   if (!token) {
-    window.location.href = '/login'
+    window.location.href = "/login";
     throw new Error("Token không tồn tại. Hãy đăng nhập lại.");
   }
   const [slots, setSlots] = useState([]);
-  const [editingSlotId, setEditingSlotId] = useState(null); 
-  const [message, setMessage] = useState(""); 
-  const [startTime, setStartTime] = useState('');
-  const [endTime, setEndTime] = useState('');
+  const [editingSlotId, setEditingSlotId] = useState(null);
+  const [message, setMessage] = useState("");
+  const [startTime, setStartTime] = useState("");
+  const [endTime, setEndTime] = useState("");
 
   useEffect(() => {
     const fetchSlots = async () => {
@@ -20,13 +20,16 @@ const SlotTime = () => {
         if (!token) {
           throw new Error("Token không tồn tại. Hãy đăng nhập lại.");
         }
-        const response = await fetch("http://localhost:3000/privatesite/slot-times", {
-          method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-        });
+        const response = await fetch(
+          `${API_CONFIG.SERVER_URL}/privatesite/slot-times`,
+          {
+            method: "GET",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
 
         if (!response.ok) {
           throw new Error(`Lỗi: ${response.statusText}`);
@@ -45,8 +48,8 @@ const SlotTime = () => {
 
   const handleEdit = (slot) => {
     setEditingSlotId(slot.TimeSlotId);
-    setStartTime(slot.StartTime ? slot.StartTime.slice(0,5) : "");
-    setEndTime(slot.EndTime ? slot.EndTime.slice(0,5) : "");
+    setStartTime(slot.StartTime ? slot.StartTime.slice(0, 5) : "");
+    setEndTime(slot.EndTime ? slot.EndTime.slice(0, 5) : "");
   };
 
   const handleDelete = async (slotId) => {
@@ -55,93 +58,113 @@ const SlotTime = () => {
     }
 
     try {
-      const response = await fetch(`http://localhost:3000/privatesite/slot-times/${slotId}`, {
-        method: "DELETE",
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
+      const response = await fetch(
+        `${API_CONFIG.SERVER_URL}/privatesite/slot-times/${slotId}`,
+        {
+          method: "DELETE",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
 
       if (response.ok) {
         setSlots(slots.filter((slot) => slot.TimeSlotId !== slotId));
-        Swal.fire('Thành công!', 'Xóa khung giờ thành công!', 'success');
+        Swal.fire("Thành công!", "Xóa khung giờ thành công!", "success");
       } else {
-        Swal.fire('Thất bại!', 'Đã xảy ra lỗi khi xóa khung giờ.', 'error');
+        Swal.fire("Thất bại!", "Đã xảy ra lỗi khi xóa khung giờ.", "error");
       }
     } catch (error) {
       console.error("Error deleting slot time:", error);
-      Swal.fire('Lỗi', 'Đã xảy ra lỗi khi xóa khung giờ.', 'error');
+      Swal.fire("Lỗi", "Đã xảy ra lỗi khi xóa khung giờ.", "error");
     }
   };
 
   // Hàm chuyển HH:mm thành HH:mm:ss
-  const toFullTime = (t) => t.length === 5 ? t + ":00" : t;
+  const toFullTime = (t) => (t.length === 5 ? t + ":00" : t);
 
   const handleSubmit = async (event) => {
     event.preventDefault();
 
     if (!startTime || !endTime) {
-      Swal.fire('Lỗi', 'Vui lòng nhập đầy đủ giờ bắt đầu và giờ kết thúc!', 'error');
+      Swal.fire(
+        "Lỗi",
+        "Vui lòng nhập đầy đủ giờ bắt đầu và giờ kết thúc!",
+        "error"
+      );
       return;
     }
 
-    const isDuplicate = slots.some(slot =>
-      slot.StartTime.slice(0,5) === startTime &&
-      slot.EndTime.slice(0,5) === endTime &&
-      (editingSlotId ? slot.TimeSlotId !== editingSlotId : true)
+    const isDuplicate = slots.some(
+      (slot) =>
+        slot.StartTime.slice(0, 5) === startTime &&
+        slot.EndTime.slice(0, 5) === endTime &&
+        (editingSlotId ? slot.TimeSlotId !== editingSlotId : true)
     );
     if (isDuplicate) {
-      Swal.fire('Lỗi', 'Khung giờ này đã tồn tại!', 'error');
+      Swal.fire("Lỗi", "Khung giờ này đã tồn tại!", "error");
       return;
     }
 
     const payload = {
       StartTime: toFullTime(startTime),
-      EndTime: toFullTime(endTime)
+      EndTime: toFullTime(endTime),
     };
 
     console.log("Payload gửi lên:", payload);
 
     if (editingSlotId) {
       try {
-        const response = await fetch(`http://localhost:3000/privatesite/edit-slot-times/${editingSlotId}`, {
-          method: "PUT",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`
-          },
-          body: JSON.stringify(payload),
-        });
+        const response = await fetch(
+          `${API_CONFIG.SERVER_URL}/privatesite/edit-slot-times/${editingSlotId}`,
+          {
+            method: "PUT",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${token}`,
+            },
+            body: JSON.stringify(payload),
+          }
+        );
         const text = await response.text();
         console.log("Kết quả trả về:", text);
         if (response.ok) {
           const updatedSlot = JSON.parse(text);
           setSlots(
             slots.map((slot) =>
-              slot.TimeSlotId === editingSlotId ? updatedSlot.slot || updatedSlot : slot
+              slot.TimeSlotId === editingSlotId
+                ? updatedSlot.slot || updatedSlot
+                : slot
             )
           );
           setEditingSlotId(null);
-          setStartTime('');
-          setEndTime('');
-          Swal.fire('Thành công!', 'Cập nhật khung giờ thành công!', 'success');
+          setStartTime("");
+          setEndTime("");
+          Swal.fire("Thành công!", "Cập nhật khung giờ thành công!", "success");
         } else {
-          Swal.fire('Thất bại!', 'Đã xảy ra lỗi khi cập nhật khung giờ.', 'error');
+          Swal.fire(
+            "Thất bại!",
+            "Đã xảy ra lỗi khi cập nhật khung giờ.",
+            "error"
+          );
         }
       } catch (error) {
         console.error("Error updating slot time:", error);
-        Swal.fire('Lỗi', 'Đã xảy ra lỗi khi cập nhật khung giờ.', 'error');
+        Swal.fire("Lỗi", "Đã xảy ra lỗi khi cập nhật khung giờ.", "error");
       }
     } else {
       try {
-        const response = await fetch("http://localhost:3000/privatesite/slot-times", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`
-          },
-          body: JSON.stringify(payload),
-        });
+        const response = await fetch(
+          `${API_CONFIG.SERVER_URL}/privatesite/slot-times`,
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${token}`,
+            },
+            body: JSON.stringify(payload),
+          }
+        );
 
         const text = await response.text();
         console.log("Kết quả trả về:", text);
@@ -149,23 +172,23 @@ const SlotTime = () => {
         if (response.ok) {
           const newSlot = JSON.parse(text);
           setSlots([...slots, newSlot.slot || newSlot]);
-          setStartTime('');
-          setEndTime('');
-          Swal.fire('Thành công!', 'Thêm khung giờ thành công!', 'success');
+          setStartTime("");
+          setEndTime("");
+          Swal.fire("Thành công!", "Thêm khung giờ thành công!", "success");
         } else {
-          Swal.fire('Thất bại!', 'Đã xảy ra lỗi khi thêm khung giờ.', 'error');
+          Swal.fire("Thất bại!", "Đã xảy ra lỗi khi thêm khung giờ.", "error");
         }
       } catch (error) {
         console.error("Error adding slot time:", error);
-        Swal.fire('Lỗi', 'Đã xảy ra lỗi khi thêm khung giờ.', 'error');
+        Swal.fire("Lỗi", "Đã xảy ra lỗi khi thêm khung giờ.", "error");
       }
     }
   };
 
   const handleCancelEdit = () => {
     setEditingSlotId(null);
-    setStartTime('');
-    setEndTime('');
+    setStartTime("");
+    setEndTime("");
     setMessage("");
   };
 
@@ -173,7 +196,7 @@ const SlotTime = () => {
   const generateHourOptions = () => {
     const times = [];
     for (let h = 6; h <= 22; h++) {
-      const hour = h.toString().padStart(2, '0');
+      const hour = h.toString().padStart(2, "0");
       times.push(`${hour}:00`);
     }
     return times;
@@ -181,7 +204,7 @@ const SlotTime = () => {
   const hourOptions = generateHourOptions();
 
   return (
-    <div className='container-fluid'>
+    <div className="container-fluid">
       {message && <div className="alert alert-info">{message}</div>}
       <div className="row">
         <div className="col-lg-6 d-flex align-items-stretch">
@@ -210,12 +233,16 @@ const SlotTime = () => {
                       .map((slot, idx) => (
                         <tr key={slot.TimeSlotId}>
                           <td className="border-bottom-0 text-center">
-                            <h6 className="fw-600 mb-0">{idx + 1}</h6> {/* Số thứ tự */}
+                            <h6 className="fw-600 mb-0">{idx + 1}</h6>{" "}
+                            {/* Số thứ tự */}
                           </td>
                           <td className="border-bottom-0 text-center">
                             <h6 className="fw-600 mb-1">
                               {slot.StartTime && slot.EndTime
-                                ? `${slot.StartTime.slice(0,5)} - ${slot.EndTime.slice(0,5)}`
+                                ? `${slot.StartTime.slice(
+                                    0,
+                                    5
+                                  )} - ${slot.EndTime.slice(0, 5)}`
                                 : ""}
                             </h6>
                           </td>
@@ -258,20 +285,32 @@ const SlotTime = () => {
                   )}
                   <div className="row align-items-end mb-3">
                     <div className="col-6">
-                      <label className="form-label fw-600 mb-1" style={{ fontSize: 15 }}>Giờ bắt đầu</label>
+                      <label
+                        className="form-label fw-600 mb-1"
+                        style={{ fontSize: 15 }}
+                      >
+                        Giờ bắt đầu
+                      </label>
                       <select
                         className="form-control"
                         value={startTime}
                         onChange={(e) => setStartTime(e.target.value)}
                       >
                         <option value="">Chọn giờ bắt đầu</option>
-                        {hourOptions.map(t => (
-                          <option key={t} value={t}>{t}</option>
+                        {hourOptions.map((t) => (
+                          <option key={t} value={t}>
+                            {t}
+                          </option>
                         ))}
                       </select>
                     </div>
                     <div className="col-6">
-                      <label className="form-label fw-600 mb-1" style={{ fontSize: 15 }}>Giờ kết thúc</label>
+                      <label
+                        className="form-label fw-600 mb-1"
+                        style={{ fontSize: 15 }}
+                      >
+                        Giờ kết thúc
+                      </label>
                       <select
                         className="form-control"
                         value={endTime}
@@ -279,13 +318,19 @@ const SlotTime = () => {
                         disabled={!startTime}
                       >
                         <option value="">Chọn giờ kết thúc</option>
-                        {startTime &&
-                          <option value={
-                            (parseInt(startTime.slice(0,2),10)+1).toString().padStart(2,'0') + ":00"
-                          }>
-                            {(parseInt(startTime.slice(0,2),10)+1).toString().padStart(2,'0') + ":00"}
+                        {startTime && (
+                          <option
+                            value={
+                              (parseInt(startTime.slice(0, 2), 10) + 1)
+                                .toString()
+                                .padStart(2, "0") + ":00"
+                            }
+                          >
+                            {(parseInt(startTime.slice(0, 2), 10) + 1)
+                              .toString()
+                              .padStart(2, "0") + ":00"}
                           </option>
-                        }
+                        )}
                       </select>
                     </div>
                   </div>

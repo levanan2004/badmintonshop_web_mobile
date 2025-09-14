@@ -1,16 +1,16 @@
-import React, { useState, useEffect } from 'react';
-import Swal from 'sweetalert2'; // Thêm dòng này
+import React, { useState, useEffect } from "react";
+import Swal from "sweetalert2"; // Thêm dòng này
 
 const Branch = () => {
   const token = localStorage.getItem("token");
   if (!token) {
-    window.location.href = '/login'
+    window.location.href = "/login";
     throw new Error("Token không tồn tại. Hãy đăng nhập lại.");
   }
-  const [branchName, setBranchName] = useState('');
+  const [branchName, setBranchName] = useState("");
   const [branches, setBranches] = useState([]);
-  const [editingBranchId, setEditingBranchId] = useState(null); 
-  const [message, setMessage] = useState(""); 
+  const [editingBranchId, setEditingBranchId] = useState(null);
+  const [message, setMessage] = useState("");
 
   useEffect(() => {
     const fetchBranches = async () => {
@@ -19,13 +19,16 @@ const Branch = () => {
         if (!token) {
           throw new Error("Token không tồn tại. Hãy đăng nhập lại.");
         }
-        const response = await fetch("http://localhost:3000/privatesite/branches", {
-          method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-        });
+        const response = await fetch(
+          `${API_CONFIG.SERVER_URL}/privatesite/branches`,
+          {
+            method: "GET",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
 
         if (!response.ok) {
           throw new Error(`Lỗi: ${response.statusText}`);
@@ -54,33 +57,36 @@ const Branch = () => {
     }
 
     try {
-      const response = await fetch(`http://localhost:3000/privatesite/branches/${branchId}`, {
-        method: "DELETE",
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
+      const response = await fetch(
+        `${API_CONFIG.SERVER_URL}/privatesite/branches/${branchId}`,
+        {
+          method: "DELETE",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
 
       const data = await response.json();
       if (response.ok) {
         setBranches(branches.filter((branch) => branch.BranchId !== branchId));
         Swal.fire(
-          'Thành công!',
-          data.message || 'Xóa chi nhánh thành công!',
-          'success'
+          "Thành công!",
+          data.message || "Xóa chi nhánh thành công!",
+          "success"
         );
       } else {
         Swal.fire(
-          'Thất bại!',
-          data.message || 'Đã xảy ra lỗi khi xóa chi nhánh.',
-          'error'
+          "Thất bại!",
+          data.message || "Đã xảy ra lỗi khi xóa chi nhánh.",
+          "error"
         );
       }
     } catch (error) {
       Swal.fire(
-        'Lỗi',
-        'Không thể kết nối tới máy chủ. Vui lòng thử lại sau.',
-        'error'
+        "Lỗi",
+        "Không thể kết nối tới máy chủ. Vui lòng thử lại sau.",
+        "error"
       );
     }
   };
@@ -89,24 +95,23 @@ const Branch = () => {
     event.preventDefault();
 
     if (!branchName.trim()) {
-      Swal.fire(
-        'Lỗi',
-        'Tên chi nhánh không được để trống!',
-        'error'
-      );
+      Swal.fire("Lỗi", "Tên chi nhánh không được để trống!", "error");
       return;
     }
 
     if (editingBranchId) {
       try {
-        const response = await fetch(`http://localhost:3000/privatesite/editbranch/${editingBranchId}`, {
-          method: "PUT",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`
-          },
-          body: JSON.stringify({ BranchName: branchName }),
-        });
+        const response = await fetch(
+          `${API_CONFIG.SERVER_URL}/privatesite/editbranch/${editingBranchId}`,
+          {
+            method: "PUT",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${token}`,
+            },
+            body: JSON.stringify({ BranchName: branchName }),
+          }
+        );
         const data = await response.json();
         if (response.ok) {
           setBranches(
@@ -115,58 +120,61 @@ const Branch = () => {
             )
           );
           setEditingBranchId(null);
-          setBranchName('');
+          setBranchName("");
           Swal.fire(
-            'Thành công!',
-            data.message || 'Cập nhật chi nhánh thành công!',
-            'success'
+            "Thành công!",
+            data.message || "Cập nhật chi nhánh thành công!",
+            "success"
           );
         } else {
           Swal.fire(
-            'Thất bại!',
-            data.message || 'Đã xảy ra lỗi khi cập nhật chi nhánh.',
-            'error'
+            "Thất bại!",
+            data.message || "Đã xảy ra lỗi khi cập nhật chi nhánh.",
+            "error"
           );
         }
       } catch (error) {
         Swal.fire(
-          'Lỗi',
-          'Không thể kết nối tới máy chủ. Vui lòng thử lại sau.',
-          'error'
+          "Lỗi",
+          "Không thể kết nối tới máy chủ. Vui lòng thử lại sau.",
+          "error"
         );
       }
     } else {
       try {
-        const response = await fetch("http://localhost:3000/privatesite/branches", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`
-          },
-          body: JSON.stringify({ BranchName: branchName }),
-        });
+        const response = await fetch(
+          `${API_CONFIG.SERVER_URL}/privatesite/branches`,
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${token}`,
+            },
+            body: JSON.stringify({ BranchName: branchName }),
+          }
+        );
 
         const data = await response.json();
         if (response.ok) {
           setBranches([...branches, data]);
           setBranchName("");
           Swal.fire(
-            'Thành công!',
-            data.message || 'Thêm chi nhánh thành công!',
-            'success'
+            "Thành công!",
+            data.message || "Thêm chi nhánh thành công!",
+            "success"
           );
         } else {
           Swal.fire(
-            'Thất bại!',
-            data.message || 'Đã xảy ra lỗi khi thêm chi nhánh.',
-            'error'
+            "Thất bại!",
+            data.message || "Đã xảy ra lỗi khi thêm chi nhánh.",
+            "error"
           );
         }
       } catch (error) {
         Swal.fire(
-          'Lỗi',
-          'Không thể kết nối tới máy chủ. Vui lòng thử lại sau.',
-          'error'
+          "Lỗi",
+          "Không thể kết nối tới máy chủ. Vui lòng thử lại sau.",
+          "error"
         );
       }
     }
@@ -174,12 +182,12 @@ const Branch = () => {
 
   const handleCancelEdit = () => {
     setEditingBranchId(null);
-    setBranchName('');
+    setBranchName("");
     setMessage("");
   };
 
   return (
-    <div className='container-fluid'>
+    <div className="container-fluid">
       {message && <div className="alert alert-info">{message}</div>}
       <div className="row">
         <div className="col-lg-6 d-flex align-items-stretch">
@@ -241,9 +249,15 @@ const Branch = () => {
                 {editingBranchId ? "Chỉnh sửa chi nhánh" : "Thêm chi nhánh"}
               </h5>
               <form onSubmit={handleSubmit}>
-                {editingBranchId && <p style={{ color: "#32a852" }}>Đang sửa mã chi nhánh: {editingBranchId}</p>}
+                {editingBranchId && (
+                  <p style={{ color: "#32a852" }}>
+                    Đang sửa mã chi nhánh: {editingBranchId}
+                  </p>
+                )}
                 <div className="mb-3">
-                  <label htmlFor="branchName" className="form-label fw-600">Tên chi nhánh</label>
+                  <label htmlFor="branchName" className="form-label fw-600">
+                    Tên chi nhánh
+                  </label>
                   <input
                     type="text"
                     className="form-control"

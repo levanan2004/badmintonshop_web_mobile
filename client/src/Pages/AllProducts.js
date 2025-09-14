@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
+import { API_CONFIG } from "../config/api";
 import "../Css/Style.css";
 
 function useQuery() {
@@ -36,17 +37,19 @@ const AllProducts = () => {
   useEffect(() => {
     setIsLoading(true);
     Promise.all([
-      fetch("http://localhost:3000/products").then(res => res.json()),
-      fetch("http://localhost:3000/brands").then(res => res.json()),
-      fetch("http://localhost:3000/categories").then(res => res.json()),
-    ]).then(([prod, br, cat]) => {
-      setProducts(prod);
-      setBrands(br);
-      setCategories(cat);
-      setFilteredProducts(prod);
-      setIsLoading(false);
-      // console.log("products sample:", prod[0]);
-    }).catch(() => setIsLoading(false));
+      fetch(`${API_CONFIG.SERVER_URL}/products`).then((res) => res.json()),
+      fetch(`${API_CONFIG.SERVER_URL}/brands`).then((res) => res.json()),
+      fetch(`${API_CONFIG.SERVER_URL}/categories`).then((res) => res.json()),
+    ])
+      .then(([prod, br, cat]) => {
+        setProducts(prod);
+        setBrands(br);
+        setCategories(cat);
+        setFilteredProducts(prod);
+        setIsLoading(false);
+        // console.log("products sample:", prod[0]);
+      })
+      .catch(() => setIsLoading(false));
   }, []);
 
   // Filter logic
@@ -54,27 +57,42 @@ const AllProducts = () => {
     let filtered = products;
     // Lọc theo query param nếu có
     if (categoryParam) {
-      filtered = filtered.filter(p => String(p.CategoryId) === String(categoryParam));
+      filtered = filtered.filter(
+        (p) => String(p.CategoryId) === String(categoryParam)
+      );
     }
     if (brandParam) {
-      filtered = filtered.filter(p => String(p.IdBrand) === String(brandParam));
+      filtered = filtered.filter(
+        (p) => String(p.IdBrand) === String(brandParam)
+      );
     }
     // Lọc theo filter sidebar
     if (selectedCategories.length > 0)
-      filtered = filtered.filter(p => selectedCategories.includes(Number(p.CategoryId)));
+      filtered = filtered.filter((p) =>
+        selectedCategories.includes(Number(p.CategoryId))
+      );
     if (selectedBrands.length > 0)
-      filtered = filtered.filter(p => selectedBrands.includes(p.IdBrand));
-    const activePrices = Object.keys(priceFilters).filter(k => priceFilters[k]);
+      filtered = filtered.filter((p) => selectedBrands.includes(p.IdBrand));
+    const activePrices = Object.keys(priceFilters).filter(
+      (k) => priceFilters[k]
+    );
     if (activePrices.length > 0) {
-      filtered = filtered.filter(p =>
-        activePrices.some(key => {
-          const opt = priceOptions.find(o => o.value === key);
+      filtered = filtered.filter((p) =>
+        activePrices.some((key) => {
+          const opt = priceOptions.find((o) => o.value === key);
           return p.Price >= opt.min && p.Price < opt.max;
         })
       );
     }
     setFilteredProducts(filtered);
-  }, [selectedBrands, selectedCategories, priceFilters, products, categoryParam, brandParam]);
+  }, [
+    selectedBrands,
+    selectedCategories,
+    priceFilters,
+    products,
+    categoryParam,
+    brandParam,
+  ]);
 
   // Sắp xếp sản phẩm
   useEffect(() => {
@@ -93,17 +111,21 @@ const AllProducts = () => {
   }, [sortOption]);
 
   // Handlers
-  const handleBrandChange = id => setSelectedBrands(prev =>
-    prev.includes(id) ? prev.filter(b => b !== id) : [...prev, id]
-  );
-  const handleCategoryChange = id => setSelectedCategories(prev =>
-    prev.includes(Number(id))
-      ? prev.filter(c => c !== Number(id))
-      : [...prev, Number(id)]
-  );
-  const handlePriceChange = key => setPriceFilters(prev => ({
-    ...prev, [key]: !prev[key]
-  }));
+  const handleBrandChange = (id) =>
+    setSelectedBrands((prev) =>
+      prev.includes(id) ? prev.filter((b) => b !== id) : [...prev, id]
+    );
+  const handleCategoryChange = (id) =>
+    setSelectedCategories((prev) =>
+      prev.includes(Number(id))
+        ? prev.filter((c) => c !== Number(id))
+        : [...prev, Number(id)]
+    );
+  const handlePriceChange = (key) =>
+    setPriceFilters((prev) => ({
+      ...prev,
+      [key]: !prev[key],
+    }));
   const handleReset = () => {
     setSelectedBrands([]);
     setSelectedCategories([]);
@@ -112,26 +134,30 @@ const AllProducts = () => {
 
   // Refs and hover handlers for cart button animation
   const cartRefs = useRef([]);
-  const handleCartHover = idx => {
+  const handleCartHover = (idx) => {
     const el = cartRefs.current[idx];
     if (!el) return;
     el.style.transition = "transform 0.18s ease";
     el.style.transform = "translateY(-4px) scale(1.06)";
   };
-  const handleCartLeave = idx => {
+  const handleCartLeave = (idx) => {
     const el = cartRefs.current[idx];
     if (!el) return;
     el.style.transform = "";
   };
 
   return (
-    <div style={{ background: "#f7f7f7", minHeight: "100vh", padding: "32px 0" }}>
-      <div style={{
-        maxWidth: 1500,
-        margin: "0 auto",
-        display: "flex",
-        gap: 24
-      }}>
+    <div
+      style={{ background: "#f7f7f7", minHeight: "100vh", padding: "32px 0" }}
+    >
+      <div
+        style={{
+          maxWidth: 1500,
+          margin: "0 auto",
+          display: "flex",
+          gap: 24,
+        }}
+      >
         {/* Sidebar bộ lọc */}
         <aside
           style={{
@@ -143,7 +169,7 @@ const AllProducts = () => {
             minWidth: 260,
             maxWidth: 320,
             flex: "0 0 280px",
-            height: "fit-content"
+            height: "fit-content",
           }}
         >
           {/* Nút xem tất cả sản phẩm */}
@@ -158,15 +184,17 @@ const AllProducts = () => {
               fontWeight: 700,
               fontSize: 16,
               marginBottom: 18,
-              cursor: "pointer"
+              cursor: "pointer",
             }}
             onClick={() => navigate("/allproducts")}
           >
             Xem tất cả sản phẩm
           </button>
-          <div style={{ fontWeight: 700, fontSize: 18, marginBottom: 18 }}>CHỌN MỨC GIÁ</div>
+          <div style={{ fontWeight: 700, fontSize: 18, marginBottom: 18 }}>
+            CHỌN MỨC GIÁ
+          </div>
           <div style={{ marginBottom: 24 }}>
-            {priceOptions.map(opt => (
+            {priceOptions.map((opt) => (
               <div key={opt.value} style={{ marginBottom: 8 }}>
                 <label style={{ fontWeight: 500 }}>
                   <input
@@ -179,9 +207,11 @@ const AllProducts = () => {
               </div>
             ))}
           </div>
-          <div style={{ fontWeight: 700, fontSize: 18, marginBottom: 12 }}>THƯƠNG HIỆU</div>
+          <div style={{ fontWeight: 700, fontSize: 18, marginBottom: 12 }}>
+            THƯƠNG HIỆU
+          </div>
           <div style={{ maxHeight: 180, overflowY: "auto", marginBottom: 24 }}>
-            {brands.map(brand => (
+            {brands.map((brand) => (
               <div key={brand.BrandId} style={{ marginBottom: 8 }}>
                 <label style={{ fontWeight: 500 }}>
                   <input
@@ -194,14 +224,18 @@ const AllProducts = () => {
               </div>
             ))}
           </div>
-          <div style={{ fontWeight: 700, fontSize: 18, marginBottom: 12 }}>THỂ LOẠI</div>
+          <div style={{ fontWeight: 700, fontSize: 18, marginBottom: 12 }}>
+            THỂ LOẠI
+          </div>
           <div style={{ maxHeight: 180, overflowY: "auto", marginBottom: 24 }}>
-            {categories.map(cat => (
+            {categories.map((cat) => (
               <div key={cat.CategoryId} style={{ marginBottom: 8 }}>
                 <label style={{ fontWeight: 500 }}>
                   <input
                     type="checkbox"
-                    checked={selectedCategories.includes(Number(cat.CategoryId))}
+                    checked={selectedCategories.includes(
+                      Number(cat.CategoryId)
+                    )}
                     onChange={() => handleCategoryChange(cat.CategoryId)}
                   />
                   <span style={{ marginLeft: 8 }}>{cat.CategoryName}</span>
@@ -219,52 +253,67 @@ const AllProducts = () => {
               padding: "6px 18px",
               fontWeight: 600,
               cursor: "pointer",
-              marginTop: 8
+              marginTop: 8,
             }}
             onClick={handleReset}
           >
             Bỏ lọc
           </button>
         </aside>
-        <main style={{
-          flex: 1,
-          background: "#eaf4fb",
-          borderRadius: 16,
-          boxShadow: "0 2px 12px #0001",
-          border: "1px solid #b6d4ef",
-          padding: 24
-        }}>
-          <div style={{
-            display: "flex",
-            justifyContent: "flex-end",
-            alignItems: "center",
-            marginBottom: 18
-          }}>
+        <main
+          style={{
+            flex: 1,
+            background: "#eaf4fb",
+            borderRadius: 16,
+            boxShadow: "0 2px 12px #0001",
+            border: "1px solid #b6d4ef",
+            padding: 24,
+          }}
+        >
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "flex-end",
+              alignItems: "center",
+              marginBottom: 18,
+            }}
+          >
             <div
               style={{
                 background: "#f5faff",
-                border: (sortBoxFocus || sortDropdownOpen) ? "2px solid #007bff" : "2px solid #b6d4ef",
+                border:
+                  sortBoxFocus || sortDropdownOpen
+                    ? "2px solid #007bff"
+                    : "2px solid #b6d4ef",
                 borderRadius: 10,
                 padding: "10px 18px",
                 display: "flex",
                 alignItems: "center",
                 boxShadow: "none",
-                transition: "border-color 0.18s"
+                transition: "border-color 0.18s",
               }}
             >
-              <span style={{ fontWeight: 500, fontSize: 15, marginRight: 8 }}>Sắp xếp:</span>
+              <span style={{ fontWeight: 500, fontSize: 15, marginRight: 8 }}>
+                Sắp xếp:
+              </span>
               <select
                 value={sortOption}
-                onChange={e => setSortOption(e.target.value)}
+                onChange={(e) => setSortOption(e.target.value)}
                 onFocus={() => setSortBoxFocus(true)}
-                onBlur={() => { setSortBoxFocus(false); setTimeout(() => setSortDropdownOpen(false), 150); }}
+                onBlur={() => {
+                  setSortBoxFocus(false);
+                  setTimeout(() => setSortDropdownOpen(false), 150);
+                }}
                 onMouseDown={() => setSortDropdownOpen(true)}
                 style={{
-                  border: (sortBoxFocus || sortDropdownOpen) ? "1.5px solid #007bff" : "1px solid #ddd",
+                  border:
+                    sortBoxFocus || sortDropdownOpen
+                      ? "1.5px solid #007bff"
+                      : "1px solid #ddd",
                   borderRadius: 6,
                   padding: "4px 12px",
                   outline: "none",
-                  transition: "border-color 0.18s"
+                  transition: "border-color 0.18s",
                 }}
               >
                 <option value="default">Mặc định</option>
@@ -276,12 +325,14 @@ const AllProducts = () => {
             </div>
           </div>
           {/* Tiêu đề */}
-          <div style={{
-            fontWeight: 700,
-            fontSize: 22,
-            color: "#222",
-            marginBottom: 18
-          }}>
+          <div
+            style={{
+              fontWeight: 700,
+              fontSize: 22,
+              color: "#222",
+              marginBottom: 18,
+            }}
+          >
             TẤT CẢ SẢN PHẨM
           </div>
           {/* Lưới sản phẩm */}
@@ -294,82 +345,128 @@ const AllProducts = () => {
             }}
           >
             {isLoading ? (
-              <div style={{ color: "#222", fontWeight: 500, gridColumn: "1/-1" }}>Đang tải sản phẩm...</div>
-            ) : filteredProducts.length > 0 ? filteredProducts.map((product, idx) => (
-              <div className="product-card" key={product.ProductId} style={{
-                borderRadius: 12,
-                border: "1px solid #eee",
-                background: "#fff",
-                boxShadow: "0 2px 8px #0001",
-                transition: "box-shadow .2s"
-              }}>
-                <div className="product-img-wrap" style={{
-                  background: "#fafafa",
-                  borderRadius: 8,
-                  height: 160,
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  marginBottom: 10
-                }}>
-                  <Link to={`/products/productdetails/${product.ProductId}`}>
-                    <img
-                      src={`http://localhost:3000/uploads/${product.Avatar}`}
-                      alt={product.ProductName}
-                      style={{ maxHeight: 140, maxWidth: "100%", objectFit: "contain" }}
-                    />
-                  </Link>
-                </div>
-                <div className="product-info" style={{ padding: "0 8px 8px" }}>
-                  <div className="product-name" style={{
-                    fontWeight: 500,
-                    fontSize: 15,
-                    marginBottom: 4,
-                    minHeight: 40,
-                    color: "#222"
-                  }}>{product.ProductName}</div>
-                  <div className="product-price" style={{
-                    color: "#e60023",
-                    fontWeight: 700,
-                    fontSize: 17
-                  }}>
-                    {Number(product.Price).toLocaleString()} đ
-                  </div>
-                  <div style={{ marginTop: 10, display: "flex", justifyContent: "center" }}>
+              <div
+                style={{ color: "#222", fontWeight: 500, gridColumn: "1/-1" }}
+              >
+                Đang tải sản phẩm...
+              </div>
+            ) : filteredProducts.length > 0 ? (
+              filteredProducts.map((product, idx) => (
+                <div
+                  className="product-card"
+                  key={product.ProductId}
+                  style={{
+                    borderRadius: 12,
+                    border: "1px solid #eee",
+                    background: "#fff",
+                    boxShadow: "0 2px 8px #0001",
+                    transition: "box-shadow .2s",
+                  }}
+                >
+                  <div
+                    className="product-img-wrap"
+                    style={{
+                      background: "#fafafa",
+                      borderRadius: 8,
+                      height: 160,
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      marginBottom: 10,
+                    }}
+                  >
                     <Link to={`/products/productdetails/${product.ProductId}`}>
-                      <button
-                        className="add-to-cart-btn"
-                        onMouseEnter={() => handleCartHover(idx)}
-                        onMouseLeave={() => handleCartLeave(idx)}
+                      <img
+                        src={`${API_CONFIG.UPLOADS_URL}/uploads/${product.Avatar}`}
+                        alt={product.ProductName}
                         style={{
-                          background: "linear-gradient(90deg,#5f9bd8,#3da0f0)",
-                          color: "#fff",
-                          border: "none",
-                          padding: "8px 12px",
-                          borderRadius: 8,
-                          cursor: "pointer",
-                          fontWeight: 700,
-                          display: "inline-flex",
-                          alignItems: "center",
-                          gap: 8
+                          maxHeight: 140,
+                          maxWidth: "100%",
+                          objectFit: "contain",
                         }}
-                      >
-                        <span
-                          role="img"
-                          aria-label="cart"
-                          ref={el => (cartRefs.current[idx] = el)}
-                          style={{ display: "inline-block" }}
-                        >
-                          🧺
-                        </span>
-                        Xem chi tiết
-                      </button>
+                      />
                     </Link>
                   </div>
+                  <div
+                    className="product-info"
+                    style={{ padding: "0 8px 8px" }}
+                  >
+                    <div
+                      className="product-name"
+                      style={{
+                        fontWeight: 500,
+                        fontSize: 15,
+                        marginBottom: 4,
+                        minHeight: 40,
+                        color: "#222",
+                      }}
+                    >
+                      {product.ProductName}
+                    </div>
+                    <div
+                      className="product-price"
+                      style={{
+                        color: "#e60023",
+                        fontWeight: 700,
+                        fontSize: 17,
+                      }}
+                    >
+                      {Number(product.Price).toLocaleString()} đ
+                    </div>
+                    <div
+                      style={{
+                        marginTop: 10,
+                        display: "flex",
+                        justifyContent: "center",
+                      }}
+                    >
+                      <Link
+                        to={`/products/productdetails/${product.ProductId}`}
+                      >
+                        <button
+                          className="add-to-cart-btn"
+                          onMouseEnter={() => handleCartHover(idx)}
+                          onMouseLeave={() => handleCartLeave(idx)}
+                          style={{
+                            background:
+                              "linear-gradient(90deg,#5f9bd8,#3da0f0)",
+                            color: "#fff",
+                            border: "none",
+                            padding: "8px 12px",
+                            borderRadius: 8,
+                            cursor: "pointer",
+                            fontWeight: 700,
+                            display: "inline-flex",
+                            alignItems: "center",
+                            gap: 8,
+                          }}
+                        >
+                          <span
+                            role="img"
+                            aria-label="cart"
+                            ref={(el) => (cartRefs.current[idx] = el)}
+                            style={{ display: "inline-block" }}
+                          >
+                            🧺
+                          </span>
+                          Xem chi tiết
+                        </button>
+                      </Link>
+                    </div>
+                  </div>
                 </div>
+              ))
+            ) : (
+              <div
+                style={{
+                  color: "#c42241",
+                  fontWeight: 500,
+                  marginTop: 32,
+                  gridColumn: "1/-1",
+                }}
+              >
+                Không có sản phẩm nào phù hợp với bộ lọc của bạn.
               </div>
-            )) : (
-              <div style={{ color: "#c42241", fontWeight: 500, marginTop: 32, gridColumn: "1/-1" }}>Không có sản phẩm nào phù hợp với bộ lọc của bạn.</div>
             )}
           </div>
         </main>

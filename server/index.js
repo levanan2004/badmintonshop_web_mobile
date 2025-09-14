@@ -1,3 +1,4 @@
+require("dotenv").config();
 const express = require("express");
 const cors = require("cors");
 const sequelize = require("./src/config/db/index.js");
@@ -7,7 +8,12 @@ const path = require("path");
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-app.use(cors({ origin: "http://localhost:3001", credentials: true }));
+app.use(
+  cors({
+    origin: process.env.API_CLIENT || "http://localhost:3001",
+    credentials: true,
+  })
+);
 app.use(express.json());
 app.use(bodyParser.json());
 app.use(
@@ -113,5 +119,9 @@ app.get(
 );
 
 app.listen(PORT, () => {
-  console.log(`🚀 Server đang chạy tại http://localhost:${PORT} hẹ hẹ`);
+  console.log(
+    `🚀 Server đang chạy tại ${
+      process.env.API_SERVER || `http://localhost:${PORT}`
+    } hẹ hẹ`
+  );
 });

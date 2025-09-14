@@ -1,19 +1,20 @@
 import React, { useState } from "react";
-import './Login.css';
+import { API_CONFIG } from "../../config/api";
+import "./Login.css";
 import { Link, useNavigate } from "react-router-dom";
 
 const Register = () => {
   const token = localStorage.getItem("token");
   if (token) {
-    window.location.href = '/home'
+    window.location.href = "/home";
   }
 
   const [formData, setFormData] = useState({
-    username: '',
-    password: '',
-    firstname: '',
-    lastname: '',
-    email: '',
+    username: "",
+    password: "",
+    firstname: "",
+    lastname: "",
+    email: "",
   });
   const navigate = useNavigate();
   const handleChange = (e) => {
@@ -26,27 +27,27 @@ const Register = () => {
 
   // Hàm xử lý đăng ký
   const registerUser = async (e) => {
-    e.preventDefault(); 
+    e.preventDefault();
 
     try {
-      const response = await fetch('http://localhost:3000/auth/register', {
-        method: 'POST',
+      const response = await fetch(API_CONFIG.ENDPOINTS.REGISTER, {
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         body: JSON.stringify(formData),
       });
 
       const result = await response.json();
       if (response.ok) {
-        console.log('Đăng ký thành công:', result);
-        localStorage.setItem('token', result.token); 
-        navigate('/login'); 
+        console.log("Đăng ký thành công:", result);
+        localStorage.setItem("token", result.token);
+        navigate("/login");
       } else {
-        console.log('Lỗi đăng ký:', result.message);
+        console.log("Lỗi đăng ký:", result.message);
       }
     } catch (error) {
-      console.error('Lỗi kết nối:', error);
+      console.error("Lỗi kết nối:", error);
     }
   };
 
@@ -98,25 +99,25 @@ const Register = () => {
                 <div className="row">
                   <div className="col-md-6 ">
                     <input
-                    type="text"
-                    id="regLastname"
-                    name="lastname"
-                    value={formData.lastname}
-                    onChange={handleChange}
-                    placeholder="Last name"
-                    required
-                  />
+                      type="text"
+                      id="regLastname"
+                      name="lastname"
+                      value={formData.lastname}
+                      onChange={handleChange}
+                      placeholder="Last name"
+                      required
+                    />
                   </div>
                   <div className="col-md-6">
                     <input
-                    type="text"
-                    id="regFirstname"
-                    name="firstname"
-                    value={formData.firstname}
-                    onChange={handleChange}
-                    placeholder="First name"
-                    required
-                  />
+                      type="text"
+                      id="regFirstname"
+                      name="firstname"
+                      value={formData.firstname}
+                      onChange={handleChange}
+                      placeholder="First name"
+                      required
+                    />
                   </div>
                 </div>
               </div>

@@ -1,14 +1,14 @@
-import React, { useState, useEffect } from 'react';
-import Swal from 'sweetalert2';
+import React, { useState, useEffect } from "react";
+import Swal from "sweetalert2";
 
 const Court = () => {
   const token = localStorage.getItem("token");
   if (!token) {
-    window.location.href = '/login'
+    window.location.href = "/login";
     throw new Error("Token không tồn tại. Hãy đăng nhập lại.");
   }
-  const [courtName, setCourtName] = useState('');
-  const [branchId, setBranchId] = useState('');
+  const [courtName, setCourtName] = useState("");
+  const [branchId, setBranchId] = useState("");
   const [courts, setCourts] = useState([]);
   const [branches, setBranches] = useState([]);
   const [editingCourtId, setEditingCourtId] = useState(null);
@@ -17,25 +17,31 @@ const Court = () => {
     // Lấy danh sách sân
     const fetchCourts = async () => {
       try {
-        const response = await fetch("http://localhost:3000/privatesite/courts", {
-          headers: { Authorization: `Bearer ${token}` }
-        });
+        const response = await fetch(
+          `${API_CONFIG.SERVER_URL}/privatesite/courts`,
+          {
+            headers: { Authorization: `Bearer ${token}` },
+          }
+        );
         const data = await response.json();
         setCourts(Array.isArray(data) ? data : data.courts);
       } catch (error) {
-        Swal.fire('Lỗi', 'Không thể tải danh sách sân.', 'error');
+        Swal.fire("Lỗi", "Không thể tải danh sách sân.", "error");
       }
     };
     // Lấy danh sách chi nhánh
     const fetchBranches = async () => {
       try {
-        const response = await fetch("http://localhost:3000/privatesite/branches", {
-          headers: { Authorization: `Bearer ${token}` }
-        });
+        const response = await fetch(
+          `${API_CONFIG.SERVER_URL}/privatesite/branches`,
+          {
+            headers: { Authorization: `Bearer ${token}` },
+          }
+        );
         const data = await response.json();
         setBranches(Array.isArray(data) ? data : data.branches);
       } catch (error) {
-        Swal.fire('Lỗi', 'Không thể tải danh sách chi nhánh.', 'error');
+        Swal.fire("Lỗi", "Không thể tải danh sách chi nhánh.", "error");
       }
     };
     fetchCourts();
@@ -51,42 +57,63 @@ const Court = () => {
   const handleDelete = async (courtId) => {
     if (!window.confirm("Bạn có chắc chắn muốn xóa sân này không?")) return;
     try {
-      const response = await fetch(`http://localhost:3000/privatesite/courts/${courtId}`, {
-        method: "DELETE",
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      const response = await fetch(
+        `${API_CONFIG.SERVER_URL}/privatesite/courts/${courtId}`,
+        {
+          method: "DELETE",
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
       const data = await response.json();
       if (response.ok) {
         setCourts(courts.filter((court) => court.CourtId !== courtId));
-        Swal.fire('Thành công!', data.message || 'Xóa sân thành công!', 'success');
+        Swal.fire(
+          "Thành công!",
+          data.message || "Xóa sân thành công!",
+          "success"
+        );
       } else {
-        Swal.fire('Thất bại!', data.message || 'Đã xảy ra lỗi khi xóa sân.', 'error');
+        Swal.fire(
+          "Thất bại!",
+          data.message || "Đã xảy ra lỗi khi xóa sân.",
+          "error"
+        );
       }
     } catch (error) {
-      Swal.fire('Lỗi', 'Không thể kết nối tới máy chủ. Vui lòng thử lại sau.', 'error');
+      Swal.fire(
+        "Lỗi",
+        "Không thể kết nối tới máy chủ. Vui lòng thử lại sau.",
+        "error"
+      );
     }
   };
 
   const handleSubmit = async (event) => {
     event.preventDefault();
     // Chỉ cho nhập số
-    const numberOnly = courtName.replace(/\D/g, '');
+    const numberOnly = courtName.replace(/\D/g, "");
     if (!numberOnly || !branchId) {
-      Swal.fire('Lỗi', 'Vui lòng nhập số sân và chọn chi nhánh!', 'error');
+      Swal.fire("Lỗi", "Vui lòng nhập số sân và chọn chi nhánh!", "error");
       return;
     }
     const finalCourtName = `Sân ${numberOnly}`;
 
     if (editingCourtId) {
       try {
-        const response = await fetch(`http://localhost:3000/privatesite/edit-courts/${editingCourtId}`, {
-          method: "PUT",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`
-          },
-          body: JSON.stringify({ CourtName: finalCourtName, BranchId: branchId }),
-        });
+        const response = await fetch(
+          `${API_CONFIG.SERVER_URL}/privatesite/edit-courts/${editingCourtId}`,
+          {
+            method: "PUT",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${token}`,
+            },
+            body: JSON.stringify({
+              CourtName: finalCourtName,
+              BranchId: branchId,
+            }),
+          }
+        );
         const data = await response.json();
         if (response.ok) {
           setCourts(
@@ -95,48 +122,78 @@ const Court = () => {
             )
           );
           setEditingCourtId(null);
-          setCourtName('');
-          setBranchId('');
-          Swal.fire('Thành công!', data.message || 'Cập nhật sân thành công!', 'success');
+          setCourtName("");
+          setBranchId("");
+          Swal.fire(
+            "Thành công!",
+            data.message || "Cập nhật sân thành công!",
+            "success"
+          );
         } else {
-          Swal.fire('Thất bại!', data.message || 'Đã xảy ra lỗi khi cập nhật sân.', 'error');
+          Swal.fire(
+            "Thất bại!",
+            data.message || "Đã xảy ra lỗi khi cập nhật sân.",
+            "error"
+          );
         }
       } catch (error) {
-        Swal.fire('Lỗi', 'Không thể kết nối tới máy chủ. Vui lòng thử lại sau.', 'error');
+        Swal.fire(
+          "Lỗi",
+          "Không thể kết nối tới máy chủ. Vui lòng thử lại sau.",
+          "error"
+        );
       }
     } else {
       try {
-        const response = await fetch("http://localhost:3000/privatesite/courts", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`
-          },
-          body: JSON.stringify({ CourtName: finalCourtName, BranchId: branchId }),
-        });
+        const response = await fetch(
+          `${API_CONFIG.SERVER_URL}/privatesite/courts`,
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${token}`,
+            },
+            body: JSON.stringify({
+              CourtName: finalCourtName,
+              BranchId: branchId,
+            }),
+          }
+        );
         const data = await response.json();
         if (response.ok) {
           setCourts([...courts, data]);
-          setCourtName('');
-          setBranchId('');
-          Swal.fire('Thành công!', data.message || 'Thêm sân thành công!', 'success');
+          setCourtName("");
+          setBranchId("");
+          Swal.fire(
+            "Thành công!",
+            data.message || "Thêm sân thành công!",
+            "success"
+          );
         } else {
-          Swal.fire('Thất bại!', data.message || 'Đã xảy ra lỗi khi thêm sân.', 'error');
+          Swal.fire(
+            "Thất bại!",
+            data.message || "Đã xảy ra lỗi khi thêm sân.",
+            "error"
+          );
         }
       } catch (error) {
-        Swal.fire('Lỗi', 'Không thể kết nối tới máy chủ. Vui lòng thử lại sau.', 'error');
+        Swal.fire(
+          "Lỗi",
+          "Không thể kết nối tới máy chủ. Vui lòng thử lại sau.",
+          "error"
+        );
       }
     }
   };
 
   const handleCancelEdit = () => {
     setEditingCourtId(null);
-    setCourtName('');
-    setBranchId('');
+    setCourtName("");
+    setBranchId("");
   };
 
   return (
-    <div className='container-fluid'>
+    <div className="container-fluid">
       <div className="row">
         <div className="col-lg-6 d-flex align-items-stretch">
           <div className="card w-100">
@@ -146,9 +203,15 @@ const Court = () => {
                 <table className="table text-nowrap mb-0 align-middle">
                   <thead className="text-dark fs-4">
                     <tr>
-                      <th className="text-center"><h6 className="fw-600 mb-0">Chi nhánh</h6></th>
-                      <th className="text-center"><h6 className="fw-600 mb-0">Tên sân</h6></th>
-                      <th className="text-center"><h6 className="fw-600 mb-0">Lệnh</h6></th>
+                      <th className="text-center">
+                        <h6 className="fw-600 mb-0">Chi nhánh</h6>
+                      </th>
+                      <th className="text-center">
+                        <h6 className="fw-600 mb-0">Tên sân</h6>
+                      </th>
+                      <th className="text-center">
+                        <h6 className="fw-600 mb-0">Lệnh</h6>
+                      </th>
                     </tr>
                   </thead>
                   <tbody>
@@ -157,20 +220,31 @@ const Court = () => {
                       .sort((a, b) => {
                         // Sắp xếp theo BranchId, sau đó theo số sân tăng dần
                         if (String(a.BranchId) !== String(b.BranchId)) {
-                          return String(a.BranchId).localeCompare(String(b.BranchId));
+                          return String(a.BranchId).localeCompare(
+                            String(b.BranchId)
+                          );
                         }
-                        const numA = parseInt(a.CourtName.replace(/\D/g, ''), 10);
-                        const numB = parseInt(b.CourtName.replace(/\D/g, ''), 10);
+                        const numA = parseInt(
+                          a.CourtName.replace(/\D/g, ""),
+                          10
+                        );
+                        const numB = parseInt(
+                          b.CourtName.replace(/\D/g, ""),
+                          10
+                        );
                         return numA - numB;
                       })
                       .map((court) => (
                         <tr key={court.CourtId}>
                           <td className="border-bottom-0 text-center">
                             <h6 className="fw-600 mb-1">
-                              {branches.find(b => String(b.BranchId) === String(court.BranchId))?.BranchName || court.BranchId}
+                              {branches.find(
+                                (b) =>
+                                  String(b.BranchId) === String(court.BranchId)
+                              )?.BranchName || court.BranchId}
                             </h6>
                           </td>
-                          
+
                           <td className="border-bottom-0 text-center">
                             <h6 className="fw-600 mb-1">{court.CourtName}</h6>
                           </td>
@@ -205,20 +279,30 @@ const Court = () => {
                 {editingCourtId ? "Chỉnh sửa sân" : "Thêm sân"}
               </h5>
               <form onSubmit={handleSubmit}>
-                {editingCourtId && <p style={{ color: "#32a852" }}>Đang sửa mã sân: {editingCourtId}</p>}
+                {editingCourtId && (
+                  <p style={{ color: "#32a852" }}>
+                    Đang sửa mã sân: {editingCourtId}
+                  </p>
+                )}
                 <div className="mb-3">
-                  <label htmlFor="courtName" className="form-label fw-600">Tên sân</label>
+                  <label htmlFor="courtName" className="form-label fw-600">
+                    Tên sân
+                  </label>
                   <input
                     type="text"
                     className="form-control"
                     id="courtName"
                     value={courtName}
-                    onChange={(e) => setCourtName(e.target.value.replace(/\D/g, ''))}
+                    onChange={(e) =>
+                      setCourtName(e.target.value.replace(/\D/g, ""))
+                    }
                     placeholder="Nhập số sân (ví dụ: 1, 2, 3)"
                   />
                 </div>
                 <div className="mb-3">
-                  <label htmlFor="branchId" className="form-label fw-600">Chi nhánh</label>
+                  <label htmlFor="branchId" className="form-label fw-600">
+                    Chi nhánh
+                  </label>
                   <select
                     className="form-control"
                     id="branchId"
@@ -226,7 +310,7 @@ const Court = () => {
                     onChange={(e) => setBranchId(e.target.value)}
                   >
                     <option value="">Chọn chi nhánh</option>
-                    {branches.map(branch => (
+                    {branches.map((branch) => (
                       <option key={branch.BranchId} value={branch.BranchId}>
                         {branch.BranchName}
                       </option>

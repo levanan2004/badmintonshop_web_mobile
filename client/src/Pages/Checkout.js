@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import "../Css/Style.css";
+import { API_CONFIG } from "../config/api";
 
 export default function Checkout() {
   const [form, setForm] = useState({
@@ -30,7 +31,7 @@ export default function Checkout() {
       return;
     }
 
-    fetch("http://localhost:3000/checkout/getcustomer", {
+    fetch(`${API_CONFIG.SERVER_URL}/checkout/getcustomer`, {
       method: "GET",
       headers: {
         Authorization: `Bearer ${token}`,
@@ -103,7 +104,7 @@ export default function Checkout() {
     // Thanh toán VNPay
     if (form.payment === "vnpay") {
       const response = await fetch(
-        "http://localhost:3000/checkout/create-vnpay-payment-url",
+        `${API_CONFIG.SERVER_URL}/checkout/create-vnpay-payment-url`,
         {
           method: "POST",
           headers: {
@@ -136,7 +137,7 @@ export default function Checkout() {
     // Thanh toán MoMo
     if (form.payment === "momo") {
       const response = await fetch(
-        "http://localhost:3000/checkout/create-momo-payment-url",
+        `${API_CONFIG.SERVER_URL}/checkout/create-momo-payment-url`,
         {
           method: "POST",
           headers: {
@@ -166,7 +167,7 @@ export default function Checkout() {
 
     // Chỉ tạo đơn hàng khi chọn COD
     if (form.payment === "cod") {
-      fetch("http://localhost:3000/checkout", {
+      fetch(`${API_CONFIG.SERVER_URL}/checkout`, {
         method: "POST",
         headers: {
           Authorization: `Bearer ${token}`,

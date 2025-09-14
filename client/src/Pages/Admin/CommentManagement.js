@@ -1,8 +1,9 @@
 import React, { useEffect, useMemo, useState } from "react";
+import { API_CONFIG } from "../../config/api";
 import axios from "axios";
 import Swal from "sweetalert2";
 
-const API = process.env.REACT_APP_API_BASE_URL || "http://localhost:3000";
+const API = API_CONFIG.SERVER_URL;
 const getAuth = () => ({
   headers: { Authorization: `Bearer ${localStorage.getItem("token") || ""}` },
 });
@@ -45,7 +46,8 @@ export default function CommentManagement() {
   };
 
   const productNameOf = (pid) =>
-    products.find((p) => String(p.ProductId) === String(pid))?.ProductName || pid;
+    products.find((p) => String(p.ProductId) === String(pid))?.ProductName ||
+    pid;
 
   // Lấy tất cả bình luận
   const fetchAllComments = async () => {
@@ -297,35 +299,33 @@ export default function CommentManagement() {
                 />
               </div>
               {error && (
-                <div className="alert alert-danger mb-3">
-                  ⚠️ {error}
-                </div>
+                <div className="alert alert-danger mb-3">⚠️ {error}</div>
               )}
               <div className="table-responsive">
                 <table className="table text-nowrap mb-0 align-middle">
                   <thead className="text-dark fs-4">
                     <tr>
-                       <th className=" text-center">
+                      <th className=" text-center">
                         <h6 className="fw-600 mb-0">Id</h6>
                       </th>
-                       <th className=" text-center">
+                      <th className=" text-center">
                         <h6 className="fw-600 mb-0">CommentId</h6>
                       </th>
-                       <th className=" text-center">
+                      <th className=" text-center">
                         <h6 className="fw-600 mb-0">Sản phẩm</h6>
                       </th>
-                       <th className=" text-center">
+                      <th className=" text-center">
                         <h6 className="fw-600 mb-0">Người bình luận</h6>
-                      </th>           
-                       <th className=" text-center">
+                      </th>
+                      <th className=" text-center">
                         <h6 className="fw-600 mb-0">Nội dung</h6>
                       </th>
-                       <th className=" text-center">
+                      <th className=" text-center">
                         <h6 className="fw-600 mb-0">Thời gian</h6>
                       </th>
-                       <th className=" text-center">
+                      <th className=" text-center">
                         <h6 className="fw-600 mb-0">Phản hồi</h6>
-                      </th>                 
+                      </th>
                     </tr>
                   </thead>
                   <tbody>
@@ -334,7 +334,10 @@ export default function CommentManagement() {
                     ))}
                     {!loading && filtered.length === 0 && (
                       <tr>
-                        <td colSpan={8} style={{ textAlign: "center", padding: 24 }}>
+                        <td
+                          colSpan={8}
+                          style={{ textAlign: "center", padding: 24 }}
+                        >
                           Không có dữ liệu
                         </td>
                       </tr>
@@ -423,10 +426,17 @@ export default function CommentManagement() {
                           <td className="text-center">{i + 1}</td>
                           <td className="text-center">#{rp.ReplyId}</td>
                           <td className="text-center">
-                            <div style={{ display: "flex", flexDirection: "column" }}>
+                            <div
+                              style={{
+                                display: "flex",
+                                flexDirection: "column",
+                              }}
+                            >
                               <strong>
                                 {rp.Account?.Username ||
-                                  `${rp.Account?.Firstname ?? ""} ${rp.Account?.Lastname ?? ""}`}
+                                  `${rp.Account?.Firstname ?? ""} ${
+                                    rp.Account?.Lastname ?? ""
+                                  }`}
                               </strong>
                               <span style={{ color: "#6b7280", fontSize: 12 }}>
                                 {rp.Account?.Email}
@@ -447,7 +457,10 @@ export default function CommentManagement() {
                       ))}
                       {replyModal.data.length === 0 && (
                         <tr>
-                          <td colSpan={6} style={{ textAlign: "center", padding: 16 }}>
+                          <td
+                            colSpan={6}
+                            style={{ textAlign: "center", padding: 16 }}
+                          >
                             Chưa có phản hồi
                           </td>
                         </tr>

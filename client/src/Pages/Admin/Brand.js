@@ -1,26 +1,29 @@
-import React, { useState, useEffect } from 'react';
-import Swal from 'sweetalert2';
+import React, { useState, useEffect } from "react";
+import Swal from "sweetalert2";
 
 const Brand = () => {
   const token = localStorage.getItem("token");
   if (!token) {
-    window.location.href = '/login'
+    window.location.href = "/login";
     throw new Error("Token không tồn tại. Hãy đăng nhập lại.");
   }
-  const [brandName, setBrandName] = useState('');
+  const [brandName, setBrandName] = useState("");
   const [brands, setBrands] = useState([]);
   const [categories, setCategories] = useState([]); // Thêm state cho category
-  const [categoryId, setCategoryId] = useState(''); // State cho category đang chọn
-  const [editingBrandId, setEditingBrandId] = useState(null); 
-  const [message, setMessage] = useState(""); 
+  const [categoryId, setCategoryId] = useState(""); // State cho category đang chọn
+  const [editingBrandId, setEditingBrandId] = useState(null);
+  const [message, setMessage] = useState("");
 
   // Lấy danh sách category
   useEffect(() => {
     const fetchCategories = async () => {
       try {
-        const res = await fetch("http://localhost:3000/privatesite/categories", {
-          headers: { Authorization: `Bearer ${token}` }
-        });
+        const res = await fetch(
+          `${API_CONFIG.SERVER_URL}/privatesite/categories`,
+          {
+            headers: { Authorization: `Bearer ${token}` },
+          }
+        );
         const data = await res.json();
         setCategories(data);
       } catch (error) {
@@ -34,13 +37,16 @@ const Brand = () => {
   useEffect(() => {
     const fetchBrands = async () => {
       try {
-        const response = await fetch("http://localhost:3000/privatesite/brands", {
-          method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-        });
+        const response = await fetch(
+          `${API_CONFIG.SERVER_URL}/privatesite/brands`,
+          {
+            method: "GET",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
 
         if (!response.ok) {
           throw new Error(`Lỗi: ${response.statusText}`);
@@ -59,30 +65,33 @@ const Brand = () => {
   const handleEdit = (brand) => {
     setEditingBrandId(brand.BrandId);
     setBrandName(brand.BrandName);
-    setCategoryId(brand.CategoryId || ''); // Gán category khi sửa
+    setCategoryId(brand.CategoryId || ""); // Gán category khi sửa
   };
 
   const handleDelete = async (brandId) => {
     const result = await Swal.fire({
-      title: 'Bạn có chắc chắn muốn xóa thương hiệu này không?',
+      title: "Bạn có chắc chắn muốn xóa thương hiệu này không?",
       text: "Hành động này không thể hoàn tác!",
-      icon: 'warning',
+      icon: "warning",
       showCancelButton: true,
-      confirmButtonColor: '#d33',
-      cancelButtonColor: '#3085d6',
-      confirmButtonText: 'Xóa',
-      cancelButtonText: 'Hủy'
+      confirmButtonColor: "#d33",
+      cancelButtonColor: "#3085d6",
+      confirmButtonText: "Xóa",
+      cancelButtonText: "Hủy",
     });
 
     if (!result.isConfirmed) return;
 
     try {
-      const response = await fetch(`http://localhost:3000/privatesite/brands/${brandId}`, {
-        method: "DELETE",
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
+      const response = await fetch(
+        `${API_CONFIG.SERVER_URL}/privatesite/brands/${brandId}`,
+        {
+          method: "DELETE",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
 
       if (response.ok) {
         setBrands(brands.filter((brand) => brand.BrandId !== brandId));
@@ -109,14 +118,20 @@ const Brand = () => {
 
     if (editingBrandId) {
       try {
-        const response = await fetch(`http://localhost:3000/privatesite/editbrand/${editingBrandId}`, {
-          method: "PUT",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`
-          },
-          body: JSON.stringify({ BrandName: brandName, CategoryId: categoryId }),
-        });
+        const response = await fetch(
+          `${API_CONFIG.SERVER_URL}/privatesite/editbrand/${editingBrandId}`,
+          {
+            method: "PUT",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${token}`,
+            },
+            body: JSON.stringify({
+              BrandName: brandName,
+              CategoryId: categoryId,
+            }),
+          }
+        );
         if (response.ok) {
           const updatedBrand = await response.json();
           setBrands(
@@ -125,8 +140,8 @@ const Brand = () => {
             )
           );
           setEditingBrandId(null);
-          setBrandName('');
-          setCategoryId('');
+          setBrandName("");
+          setCategoryId("");
           setMessage("Cập nhật thương hiệu thành công!");
         } else {
           setMessage("Đã xảy ra lỗi khi cập nhật thương hiệu.");
@@ -136,20 +151,26 @@ const Brand = () => {
       }
     } else {
       try {
-        const response = await fetch("http://localhost:3000/privatesite/brands", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`
-          },
-          body: JSON.stringify({ BrandName: brandName, CategoryId: categoryId }),
-        });
+        const response = await fetch(
+          `${API_CONFIG.SERVER_URL}/privatesite/brands`,
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${token}`,
+            },
+            body: JSON.stringify({
+              BrandName: brandName,
+              CategoryId: categoryId,
+            }),
+          }
+        );
 
         if (response.ok) {
           const newBrand = await response.json();
           setBrands([...brands, newBrand]);
           setBrandName("");
-          setCategoryId('');
+          setCategoryId("");
           setMessage("Thêm thương hiệu thành công!");
         } else {
           setMessage("Đã xảy ra lỗi khi thêm thương hiệu.");
@@ -162,13 +183,13 @@ const Brand = () => {
 
   const handleCancelEdit = () => {
     setEditingBrandId(null);
-    setBrandName('');
-    setCategoryId('');
+    setBrandName("");
+    setCategoryId("");
     setMessage("");
   };
 
   return (
-    <div className='container-fluid'>
+    <div className="container-fluid">
       {message && <div className="alert alert-info">{message}</div>}
       <div className="row">
         <div className="col-lg-6 d-flex align-items-stretch">
@@ -204,7 +225,9 @@ const Brand = () => {
                         </td>
                         <td className="border-bottom-0 text-center">
                           <h6 className="fw-600 mb-1">
-                            {categories.find(cat => cat.CategoryId === brand.CategoryId)?.CategoryName || ""}
+                            {categories.find(
+                              (cat) => cat.CategoryId === brand.CategoryId
+                            )?.CategoryName || ""}
                           </h6>
                         </td>
                         <td className="border-bottom-0 text-center">
@@ -238,9 +261,15 @@ const Brand = () => {
                 {editingBrandId ? "Chỉnh sửa thương hiệu" : "Thêm thương hiệu"}
               </h5>
               <form onSubmit={handleSubmit}>
-                {editingBrandId && <p style={{ color: "#32a852" }}>Đang sửa mã thương hiệu: {editingBrandId}</p>}
+                {editingBrandId && (
+                  <p style={{ color: "#32a852" }}>
+                    Đang sửa mã thương hiệu: {editingBrandId}
+                  </p>
+                )}
                 <div className="mb-3">
-                  <label htmlFor="brandName" className="form-label fw-600">Tên thương hiệu</label>
+                  <label htmlFor="brandName" className="form-label fw-600">
+                    Tên thương hiệu
+                  </label>
                   <input
                     type="text"
                     className="form-control"
@@ -251,15 +280,17 @@ const Brand = () => {
                   />
                 </div>
                 <div className="mb-3">
-                  <label htmlFor="categoryId" className="form-label fw-600">Danh mục</label>
+                  <label htmlFor="categoryId" className="form-label fw-600">
+                    Danh mục
+                  </label>
                   <select
                     className="form-control"
                     id="categoryId"
                     value={categoryId}
-                    onChange={e => setCategoryId(Number(e.target.value))}
+                    onChange={(e) => setCategoryId(Number(e.target.value))}
                   >
                     <option value="">-- Chọn danh mục --</option>
-                    {categories.map(cat => (
+                    {categories.map((cat) => (
                       <option key={cat.CategoryId} value={cat.CategoryId}>
                         {cat.CategoryName}
                       </option>

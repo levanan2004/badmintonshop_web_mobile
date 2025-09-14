@@ -10,7 +10,14 @@ import {
   Legend,
 } from "chart.js";
 
-ChartJS.register(CategoryScale, LinearScale, BarElement, ArcElement, Tooltip, Legend);
+ChartJS.register(
+  CategoryScale,
+  LinearScale,
+  BarElement,
+  ArcElement,
+  Tooltip,
+  Legend
+);
 
 const RevenuePage = () => {
   const [monthlyOrders, setMonthlyOrders] = useState(0);
@@ -24,7 +31,9 @@ const RevenuePage = () => {
 
   const fetchRevenueData = async () => {
     try {
-      const response = await fetch("http://localhost:3000/privatesite/revenue");
+      const response = await fetch(
+        `${API_CONFIG.SERVER_URL}/privatesite/revenue`
+      );
       const data = await response.json();
       setMonthlyOrders(data.CountOrdersMonthly || 0);
       setYearlyOrders(data.CountOrdersYear || 0);
@@ -74,7 +83,9 @@ const RevenuePage = () => {
         <div className="container-fluid">
           <div className="row mb-4">
             <div className="col-12 text-center">
-              <h2 style={{ fontWeight: 700, color: "#2563eb", letterSpacing: 1 }}>
+              <h2
+                style={{ fontWeight: 700, color: "#2563eb", letterSpacing: 1 }}
+              >
                 THỐNG KÊ DOANH THU
               </h2>
               <p style={{ color: "#333", fontSize: 18 }}>
@@ -98,7 +109,9 @@ const RevenuePage = () => {
                 }}
               >
                 <h4 style={{ color: "#2563eb", fontWeight: 600 }}>Tháng này</h4>
-                <div style={{ fontSize: 38, fontWeight: 700, color: "#2563eb" }}>
+                <div
+                  style={{ fontSize: 38, fontWeight: 700, color: "#2563eb" }}
+                >
                   {(revenueMonthly ?? 0).toLocaleString()} đ
                 </div>
                 <div style={{ fontSize: 22, color: "#333", marginTop: 8 }}>
@@ -120,7 +133,9 @@ const RevenuePage = () => {
                 }}
               >
                 <h4 style={{ color: "#e11d48", fontWeight: 600 }}>Năm nay</h4>
-                <div style={{ fontSize: 38, fontWeight: 700, color: "#e11d48" }}>
+                <div
+                  style={{ fontSize: 38, fontWeight: 700, color: "#e11d48" }}
+                >
                   {(revenueYear ?? 0).toLocaleString()} đ
                 </div>
                 <div style={{ fontSize: 22, color: "#333", marginTop: 8 }}>

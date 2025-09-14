@@ -274,7 +274,9 @@ exports.getOrderDetails = async (req, res) => {
         ImageUrl:
           od.Product?.ImageUrl ||
           (od.Product?.Avatar
-            ? `http://localhost:3000/uploads/${od.Product.Avatar}`
+            ? `${process.env.API_SERVER || "http://localhost:3000"}/uploads/${
+                od.Product.Avatar
+              }`
             : ""),
       })),
     });

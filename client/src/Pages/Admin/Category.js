@@ -1,14 +1,14 @@
-import React, { useState, useEffect } from 'react';
-import Swal from 'sweetalert2';
+import React, { useState, useEffect } from "react";
+import Swal from "sweetalert2";
 
 const Category = () => {
   const token = localStorage.getItem("token");
   if (!token) {
-    window.location.href = '/login';
+    window.location.href = "/login";
     throw new Error("Token không tồn tại. Hãy đăng nhập lại.");
   }
-  const [categoryName, setCategoryName] = useState('');
-  const [categoryId, setCategoryId] = useState(''); // Thêm state nếu muốn nhập Id (không khuyến khích tự nhập Id nếu auto increment)
+  const [categoryName, setCategoryName] = useState("");
+  const [categoryId, setCategoryId] = useState(""); // Thêm state nếu muốn nhập Id (không khuyến khích tự nhập Id nếu auto increment)
   const [categories, setCategories] = useState([]);
   const [editingCategoryId, setEditingCategoryId] = useState(null);
   const [message, setMessage] = useState("");
@@ -16,13 +16,16 @@ const Category = () => {
   useEffect(() => {
     const fetchCategories = async () => {
       try {
-        const response = await fetch("http://localhost:3000/privatesite/categories", {
-          method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-        });
+        const response = await fetch(
+          `${API_CONFIG.SERVER_URL}/privatesite/categories`,
+          {
+            method: "GET",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
 
         if (!response.ok) {
           throw new Error(`Lỗi: ${response.statusText}`);
@@ -46,28 +49,33 @@ const Category = () => {
 
   const handleDelete = async (categoryId) => {
     const result = await Swal.fire({
-      title: 'Bạn có chắc chắn muốn xóa thể loại này không?',
+      title: "Bạn có chắc chắn muốn xóa thể loại này không?",
       text: "Hành động này không thể hoàn tác!",
-      icon: 'warning',
+      icon: "warning",
       showCancelButton: true,
-      confirmButtonColor: '#d33',
-      cancelButtonColor: '#3085d6',
-      confirmButtonText: 'Xóa',
-      cancelButtonText: 'Hủy'
+      confirmButtonColor: "#d33",
+      cancelButtonColor: "#3085d6",
+      confirmButtonText: "Xóa",
+      cancelButtonText: "Hủy",
     });
 
     if (!result.isConfirmed) return;
 
     try {
-      const response = await fetch(`http://localhost:3000/privatesite/categories/${categoryId}`, {
-        method: "DELETE",
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
+      const response = await fetch(
+        `${API_CONFIG.SERVER_URL}/privatesite/categories/${categoryId}`,
+        {
+          method: "DELETE",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
 
       if (response.ok) {
-        setCategories(categories.filter((cat) => cat.CategoryId !== categoryId));
+        setCategories(
+          categories.filter((cat) => cat.CategoryId !== categoryId)
+        );
         Swal.fire("Thành công!", "Xóa thể loại thành công!", "success");
       } else {
         Swal.fire("Lỗi", "Đã xảy ra lỗi khi xóa thể loại.", "error");
@@ -87,9 +95,10 @@ const Category = () => {
 
     // Kiểm tra trùng tên (không phân biệt hoa thường)
     const nameLower = categoryName.trim().toLowerCase();
-    const isDuplicate = categories.some(cat =>
-      cat.CategoryName.trim().toLowerCase() === nameLower &&
-      (!editingCategoryId || cat.CategoryId !== editingCategoryId)
+    const isDuplicate = categories.some(
+      (cat) =>
+        cat.CategoryName.trim().toLowerCase() === nameLower &&
+        (!editingCategoryId || cat.CategoryId !== editingCategoryId)
     );
     if (isDuplicate) {
       setMessage("Tên thể loại đã tồn tại!");
@@ -98,23 +107,28 @@ const Category = () => {
 
     if (editingCategoryId) {
       try {
-        const response = await fetch(`http://localhost:3000/privatesite/editcategory/${editingCategoryId}`, {
-          method: "PUT",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`
-          },
-          body: JSON.stringify({ CategoryName: categoryName }),
-        });
+        const response = await fetch(
+          `${API_CONFIG.SERVER_URL}/privatesite/editcategory/${editingCategoryId}`,
+          {
+            method: "PUT",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${token}`,
+            },
+            body: JSON.stringify({ CategoryName: categoryName }),
+          }
+        );
         if (response.ok) {
           const updatedCategory = await response.json();
           setCategories(
             categories.map((cat) =>
-              cat.CategoryId === editingCategoryId ? updatedCategory.category : cat
+              cat.CategoryId === editingCategoryId
+                ? updatedCategory.category
+                : cat
             )
           );
           setEditingCategoryId(null);
-          setCategoryName('');
+          setCategoryName("");
           setMessage("Cập nhật thể loại thành công!");
         } else {
           setMessage("Đã xảy ra lỗi khi cập nhật thể loại.");
@@ -125,14 +139,17 @@ const Category = () => {
       }
     } else {
       try {
-        const response = await fetch("http://localhost:3000/privatesite/categories", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`
-          },
-          body: JSON.stringify({ CategoryName: categoryName }),
-        });
+        const response = await fetch(
+          `${API_CONFIG.SERVER_URL}/privatesite/categories`,
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${token}`,
+            },
+            body: JSON.stringify({ CategoryName: categoryName }),
+          }
+        );
 
         if (response.ok) {
           const newCategory = await response.json();
@@ -151,12 +168,12 @@ const Category = () => {
 
   const handleCancelEdit = () => {
     setEditingCategoryId(null);
-    setCategoryName('');
+    setCategoryName("");
     setMessage("");
   };
 
   return (
-    <div className='container-fluid'>
+    <div className="container-fluid">
       {message && <div className="alert alert-info">{message}</div>}
       <div className="row">
         <div className="col-lg-6 d-flex align-items-stretch">
@@ -218,9 +235,15 @@ const Category = () => {
                 {editingCategoryId ? "Chỉnh sửa thể loại" : "Thêm thể loại"}
               </h5>
               <form onSubmit={handleSubmit}>
-                {editingCategoryId && <p style={{ color: "#32a852" }}>Đang sửa mã thể loại: {editingCategoryId}</p>}
+                {editingCategoryId && (
+                  <p style={{ color: "#32a852" }}>
+                    Đang sửa mã thể loại: {editingCategoryId}
+                  </p>
+                )}
                 <div className="mb-3">
-                  <label htmlFor="categoryName" className="form-label fw-600">Tên thể loại</label>
+                  <label htmlFor="categoryName" className="form-label fw-600">
+                    Tên thể loại
+                  </label>
                   <input
                     type="text"
                     className="form-control"

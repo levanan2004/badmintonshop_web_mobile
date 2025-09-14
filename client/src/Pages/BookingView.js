@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom"; // Thêm dòng này
+import { useNavigate } from "react-router-dom";
+import { API_CONFIG } from "../config/api";
 
 const days = ["Thứ 2", "Thứ 3", "Thứ 4", "Thứ 5", "Thứ 6", "Thứ 7", "Chủ nhật"];
 // XÓA mảng tĩnh timeSlots
@@ -30,9 +31,9 @@ function Booking() {
 
   // Lấy danh sách chi nhánh khi load trang
   useEffect(() => {
-    fetch("http://localhost:3000/branches")
-      .then(res => res.json())
-      .then(data => {
+    fetch(API_CONFIG.ENDPOINTS.BRANCHES)
+      .then((res) => res.json())
+      .then((data) => {
         setBranches(data);
         if (data.length > 0) setSelectedBranch(data[0].BranchId);
       })
@@ -41,18 +42,18 @@ function Booking() {
 
   // Lấy danh sách khung giờ khi load trang
   useEffect(() => {
-    fetch("http://localhost:3000/timeslots")
-      .then(res => res.json())
-      .then(data => setTimeSlots(data))
+    fetch(API_CONFIG.ENDPOINTS.TIMESLOTS)
+      .then((res) => res.json())
+      .then((data) => setTimeSlots(data))
       .catch(() => setTimeSlots([]));
   }, []);
 
   // Lấy danh sách sân khi chọn chi nhánh
   useEffect(() => {
     if (selectedBranch) {
-      fetch(`http://localhost:3000/courts?branchId=${selectedBranch}`)
-        .then(res => res.json())
-        .then(data => {
+      fetch(`${API_CONFIG.ENDPOINTS.COURTS}?branchId=${selectedBranch}`)
+        .then((res) => res.json())
+        .then((data) => {
           setCourts(data);
           // Nếu có sân, mặc định chọn sân đầu tiên
           if (data.length > 0) setSelectedCourt(data[0].CourtId);
@@ -76,24 +77,24 @@ function Booking() {
     const weekStartStr = weekDates[0].toISOString().slice(0, 10);
     const weekEndStr = weekDates[6].toISOString().slice(0, 10);
     fetch(
-      `http://localhost:3000/booked-slots?branchId=${selectedBranch}&courtId=${selectedCourt}&weekStart=${weekStartStr}&weekEnd=${weekEndStr}`
+      `${API_CONFIG.ENDPOINTS.BOOKED_SLOTS}?branchId=${selectedBranch}&courtId=${selectedCourt}&weekStart=${weekStartStr}&weekEnd=${weekEndStr}`
     )
-      .then(res => res.json())
-      .then(data => setBookedSlots(data))
+      .then((res) => res.json())
+      .then((data) => setBookedSlots(data))
       .catch(() => setBookedSlots([]));
   }, [selectedBranch, selectedCourt, weekStart]);
 
   // Chọn/huỷ chọn khung giờ
   const toggleSlot = (dayIdx, timeIdx) => {
     const key = `${dayIdx}-${timeIdx}`;
-    setSelectedSlots(slots => {
+    setSelectedSlots((slots) => {
       // Nếu đã chọn thì bỏ chọn (chỉ cho bỏ chọn ở đầu/cuối dải liên tiếp)
-      if (slots.some(s => s.key === key)) {
+      if (slots.some((s) => s.key === key)) {
         // Sắp xếp lại theo timeIdx
         const sorted = [...slots].sort((a, b) => a.timeIdx - b.timeIdx);
         // Nếu là đầu hoặc cuối dải thì cho bỏ, còn lại thì không
         if (sorted[0].key === key || sorted[sorted.length - 1].key === key) {
-          return slots.filter(s => s.key !== key);
+          return slots.filter((s) => s.key !== key);
         } else {
           alert("Chỉ được bỏ chọn ở đầu hoặc cuối dải khung giờ!");
           return slots;
@@ -107,8 +108,10 @@ function Booking() {
         // Nếu chưa chọn slot nào thì cho chọn
         if (slots.length === 0) return [{ key, dayIdx, timeIdx }];
         // Kiểm tra tất cả slot đã chọn cùng ngày
-        if (!slots.every(s => s.dayIdx === dayIdx)) {
-          alert("Bạn chỉ được chọn các khung giờ liên tiếp trong cùng một ngày!");
+        if (!slots.every((s) => s.dayIdx === dayIdx)) {
+          alert(
+            "Bạn chỉ được chọn các khung giờ liên tiếp trong cùng một ngày!"
+          );
           return slots;
         }
         // Sắp xếp lại theo timeIdx
@@ -152,12 +155,15 @@ function Booking() {
     const bookingSlots = selectedSlots.map(({ dayIdx, timeIdx }) => ({
       branchId: selectedBranch,
       courtId: selectedCourt,
-      courtName: courts.find(c => c.CourtId === selectedCourt)?.CourtName,
+      courtName: courts.find((c) => c.CourtId === selectedCourt)?.CourtName,
       bookingDate: weekDates[dayIdx].toISOString().slice(0, 10),
       timeSlotId: timeSlots[timeIdx]?.TimeSlotId,
       timeSlotLabel: timeSlots[timeIdx]
-        ? `${parseInt(timeSlots[timeIdx].StartTime.split(":")[0], 10)}-${parseInt(timeSlots[timeIdx].EndTime.split(":")[0], 10)}`
-        : ""
+        ? `${parseInt(
+            timeSlots[timeIdx].StartTime.split(":")[0],
+            10
+          )}-${parseInt(timeSlots[timeIdx].EndTime.split(":")[0], 10)}`
+        : "",
     }));
     navigate("/bookingcheckout", { state: { bookingSlots } });
   };
@@ -166,22 +172,29 @@ function Booking() {
     <div className="booking-container">
       <h2 className="booking-title">Đặt và chọn địa chỉ sân</h2>
       <div className="booking-branches">
-        {branches.map(b => (
+        {branches.map((b) => (
           <button
             key={b.BranchId}
             type="button"
-            className={selectedBranch === b.BranchId ? "branch-btn selected" : "branch-btn"}
+            className={
+              selectedBranch === b.BranchId
+                ? "branch-btn selected"
+                : "branch-btn"
+            }
             onClick={() => setSelectedBranch(b.BranchId)}
             style={{
               marginRight: 16,
               padding: "8px 18px",
               borderRadius: 6,
-              border: selectedBranch === b.BranchId ? "2px solid #007bff" : "1px solid #2c5673",
+              border:
+                selectedBranch === b.BranchId
+                  ? "2px solid #007bff"
+                  : "1px solid #2c5673",
               background: selectedBranch === b.BranchId ? "#eaf6fb" : "#f5faff",
               color: selectedBranch === b.BranchId ? "#007bff" : "#2c5673",
               fontWeight: selectedBranch === b.BranchId ? "bold" : "normal",
               cursor: "pointer",
-              outline: "none"
+              outline: "none",
             }}
           >
             {b.BranchName}
@@ -189,10 +202,12 @@ function Booking() {
         ))}
       </div>
       <div className="booking-courts">
-        {courts.map(court => (
+        {courts.map((court) => (
           <div
             key={court.CourtId}
-            className={`booking-court${selectedCourt === court.CourtId ? " selected" : ""}`}
+            className={`booking-court${
+              selectedCourt === court.CourtId ? " selected" : ""
+            }`}
             onClick={() => handleCourtSelect(court.CourtId)}
           >
             <span className="court-number">{court.CourtName}</span>
@@ -202,7 +217,8 @@ function Booking() {
       <div className="booking-week">
         <button onClick={() => changeWeek(-1)}>Tuần trước</button>
         <span>
-          Tuần: {weekDates[0].toLocaleDateString()} - {weekDates[6].toLocaleDateString()}
+          Tuần: {weekDates[0].toLocaleDateString()} -{" "}
+          {weekDates[6].toLocaleDateString()}
         </span>
         <button onClick={() => changeWeek(1)}>Tuần sau</button>
       </div>
@@ -210,22 +226,46 @@ function Booking() {
         <thead>
           <tr>
             {days.map((d, i) => {
-              const cellDateStr = weekDates[i].toISOString().slice(0,10);
-              const todayStr = today.toISOString().slice(0,10);
+              const cellDateStr = weekDates[i].toISOString().slice(0, 10);
+              const todayStr = today.toISOString().slice(0, 10);
               const isToday = cellDateStr === todayStr;
-                  return ( 
-                    <th key={i} style={{ position: "relative", padding: 12 }}>
-                      <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 6, justifyContent: "center" }}>
-                          {isToday && (
-                            <div title="Hôm nay" aria-label="Hôm nay" style={{ background: "#e0f2fe", padding: 6, borderRadius: 20, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 18 }}>
-                              <span role="img" aria-hidden="false">🎯</span>
-                            </div>
-                          )}
-                          <div style={{ fontWeight: 700, marginTop: 4 }}>{d}</div>
-                          <div style={{ fontSize: 12, color: "#555" }}>{weekDates[i].toLocaleDateString()}</div>
-                        </div>
-                    </th>
-                  ); 
+              return (
+                <th key={i} style={{ position: "relative", padding: 12 }}>
+                  <div
+                    style={{
+                      display: "flex",
+                      flexDirection: "column",
+                      alignItems: "center",
+                      gap: 6,
+                      justifyContent: "center",
+                    }}
+                  >
+                    {isToday && (
+                      <div
+                        title="Hôm nay"
+                        aria-label="Hôm nay"
+                        style={{
+                          background: "#e0f2fe",
+                          padding: 6,
+                          borderRadius: 20,
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                          fontSize: 18,
+                        }}
+                      >
+                        <span role="img" aria-hidden="false">
+                          🎯
+                        </span>
+                      </div>
+                    )}
+                    <div style={{ fontWeight: 700, marginTop: 4 }}>{d}</div>
+                    <div style={{ fontSize: 12, color: "#555" }}>
+                      {weekDates[i].toLocaleDateString()}
+                    </div>
+                  </div>
+                </th>
+              );
             })}
           </tr>
         </thead>
@@ -244,23 +284,21 @@ function Booking() {
                 <tr key={slot.TimeSlotId}>
                   {days.map((_, dayIdx) => {
                     const key = `${dayIdx}-${timeIdx}`;
-                    const slotDate = weekDates[dayIdx].toISOString().slice(0, 10);
-                                     const isBooked = bookedSlots.some(
-                      b =>
+                    const slotDate = weekDates[dayIdx]
+                      .toISOString()
+                      .slice(0, 10);
+                    const isBooked = bookedSlots.some(
+                      (b) =>
                         b.CourtId === selectedCourt &&
                         b.BookingDate === slotDate &&
                         b.TimeSlotId === slot.TimeSlotId
                     );
-                    const selected = selectedSlots.some(s => s.key === key);
+                    const selected = selectedSlots.some((s) => s.key === key);
                     return (
                       <td
                         key={key}
                         className={
-                          isBooked
-                            ? "booked"
-                            : selected
-                            ? "selected"
-                            : ""
+                          isBooked ? "booked" : selected ? "selected" : ""
                         }
                         style={{
                           background: isBooked
@@ -269,7 +307,7 @@ function Booking() {
                             ? "linear-gradient(20deg, #5f9bd8 0%, #d9dde2 100%)"
                             : "#fff",
                           color: isBooked ? "#888" : undefined,
-                          cursor: isBooked ? "not-allowed" : "pointer"
+                          cursor: isBooked ? "not-allowed" : "pointer",
                         }}
                         onClick={() => {
                           if (!isBooked) toggleSlot(dayIdx, timeIdx);

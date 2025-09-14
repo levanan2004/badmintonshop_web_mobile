@@ -162,8 +162,12 @@ exports.createMoMoPaymentUrl = async (req, res) => {
     const accessKey = "F8BBA842ECF85";
     const secretKey = "K951B6PE1waDMi640xX08PD3vg6EkVlz";
     const endpoint = "https://test-payment.momo.vn/v2/gateway/api/create";
-    const redirectUrl = "http://localhost:3000/momo_return";
-    const ipnUrl = "http://localhost:3000/momo_ipn";
+    const redirectUrl = `${
+      process.env.API_SERVER || "http://localhost:3000"
+    }/momo_return`;
+    const ipnUrl = `${
+      process.env.API_SERVER || "http://localhost:3000"
+    }/momo_ipn`;
     const requestType = "captureWallet";
 
     // Lấy token và giải mã user
@@ -292,9 +296,10 @@ const vnp_Url = (
   process.env.VNP_URL || "https://sandbox.vnpayment.vn/paymentv2/vpcpay.html"
 ).trim();
 const vnp_ReturnUrl = (
-  process.env.VNP_RETURN_URL || "http://localhost:3000/checkout/vnpay_return"
+  process.env.VNP_RETURN_URL ||
+  `${process.env.API_SERVER || "http://localhost:3000"}/checkout/vnpay_return`
 ).trim();
-const FE_BASE = (process.env.FE_BASE_URL || "http://localhost:3001").trim();
+const FE_BASE = (process.env.API_CLIENT || "http://localhost:3001").trim();
 
 // ===== Helpers chung =====
 // encode theo application/x-www-form-urlencoded (space -> '+')
@@ -486,7 +491,7 @@ exports.vnpayReturnHandler = async (req, res) => {
     const transStatus = vnp_Params["vnp_TransactionStatus"];
     const orderIdRaw = vnp_Params["vnp_TxnRef"];
     const orderId = Number.parseInt(orderIdRaw, 10);
-    
+
     const amount = Number(vnp_Params["vnp_Amount"] || 0);
 
     const order = await Order.findOne({ where: { OrderId: orderId } });
@@ -494,7 +499,6 @@ exports.vnpayReturnHandler = async (req, res) => {
       return res.redirect(`${FE_BASE}/payment-failed?error=order_not_found`);
     }
     if (Number(order.TotalPrice) * 100 !== amount) {
-
       return res.redirect(`${FE_BASE}/payment-failed?error=amount_mismatch`);
     }
 
@@ -506,7 +510,7 @@ exports.vnpayReturnHandler = async (req, res) => {
             { PaymentStatus: "Success" },
             { where: { OrderId: orderId } }
           );
-        
+
           const tx = await VnpayTransaction.create({
             OrderId: orderId,
             vnp_TxnRef: vnp_Params["vnp_TxnRef"],
@@ -517,8 +521,6 @@ exports.vnpayReturnHandler = async (req, res) => {
             vnp_PayDate: vnp_Params["vnp_PayDate"] || null,
             Status: "Success",
           });
-   
-          
         }
       } catch (dbErr) {
         console.error("[VNPay][RETURN] DB error:", {
@@ -532,7 +534,7 @@ exports.vnpayReturnHandler = async (req, res) => {
       // Clear session cart
       try {
         if (req.session) {
-          req.session.cart = []; 
+          req.session.cart = [];
           if (typeof req.session.save === "function") {
             await new Promise((resolve, reject) =>
               req.session.save((err) => (err ? reject(err) : resolve()))

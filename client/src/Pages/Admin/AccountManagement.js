@@ -2,10 +2,11 @@ import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import Swal from "sweetalert2";
 
+import { API_CONFIG } from "../config/api";
 const AccountManagement = () => {
   const token = localStorage.getItem("token");
   if (!token) {
-    window.location.href = '/login'
+    window.location.href = "/login";
     throw new Error("Token không tồn tại. Hãy đăng nhập lại.");
   }
   const [accounts, setAccounts] = useState([]);
@@ -13,53 +14,71 @@ const AccountManagement = () => {
   useEffect(() => {
     const fetchAccounts = async () => {
       try {
-        const response = await fetch("http://localhost:3000/privatesite/accountmanagement",{
-          method: "GET",
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
+        const response = await fetch(
+          `${API_CONFIG.SERVER_URL}/privatesite/accountmanagement`,
+          {
+            method: "GET",
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
         const data = await response.json();
-        setAccounts(data); 
+        setAccounts(data);
       } catch (error) {
         console.error("Error", error);
       }
     };
 
     fetchAccounts();
-  }, []); 
+  }, []);
 
   // Hàm xóa tài khoản với hiệu ứng xác nhận và thông báo
   const handleDelete = async (accountId) => {
     const result = await Swal.fire({
-      title: 'Bạn có chắc chắn muốn xóa tài khoản này không?',
+      title: "Bạn có chắc chắn muốn xóa tài khoản này không?",
       text: "Hành động này không thể hoàn tác!",
-      icon: 'warning',
+      icon: "warning",
       showCancelButton: true,
-      confirmButtonColor: '#d33',
-      cancelButtonColor: '#3085d6',
-      confirmButtonText: 'Xóa',
-      cancelButtonText: 'Hủy'
+      confirmButtonColor: "#d33",
+      cancelButtonColor: "#3085d6",
+      confirmButtonText: "Xóa",
+      cancelButtonText: "Hủy",
     });
 
     if (!result.isConfirmed) return;
 
     try {
-      const response = await fetch(`http://localhost:3000/privatesite/accountmanagement/${accountId}`, {
-        method: "DELETE",
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
+      const response = await fetch(
+        `${API_CONFIG.SERVER_URL}/privatesite/accountmanagement/${accountId}`,
+        {
+          method: "DELETE",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
       const data = await response.json();
       if (response.ok) {
-        setAccounts(accounts.filter(acc => acc.AccountId !== accountId));
-        Swal.fire("Thành công!", data.message || "Xóa tài khoản thành công!", "success");
+        setAccounts(accounts.filter((acc) => acc.AccountId !== accountId));
+        Swal.fire(
+          "Thành công!",
+          data.message || "Xóa tài khoản thành công!",
+          "success"
+        );
       } else {
-        Swal.fire("Lỗi", data.message || "Đã xảy ra lỗi khi xóa tài khoản.", "error");
+        Swal.fire(
+          "Lỗi",
+          data.message || "Đã xảy ra lỗi khi xóa tài khoản.",
+          "error"
+        );
       }
     } catch (error) {
-      Swal.fire("Lỗi", "Không thể kết nối tới máy chủ. Vui lòng thử lại sau.", "error");
+      Swal.fire(
+        "Lỗi",
+        "Không thể kết nối tới máy chủ. Vui lòng thử lại sau.",
+        "error"
+      );
     }
   };
 
@@ -95,45 +114,49 @@ const AccountManagement = () => {
                     </tr>
                   </thead>
                   <tbody>
-                    {Array.isArray(accounts) && accounts.map((acc) => (
-                    <tr key={acc.AccountId}>
-                      <td className="border-bottom-0 text-center">
-                        <h6 className="fw-600 mb-0">{acc.AccountId}</h6>
-                      </td>
-                      <td className="border-bottom-0 text-center">
-                        <h6 className="fw-600 mb-1">{acc.Username}</h6>
-                      </td>
-                      <td className="border-bottom-0 text-center">
-                        <p className="mb-0 fw-normal">{acc.Email}</p>
-                      </td>
-                      <td className="border-bottom-0 text-center">
-                        <p className="mb-0 fw-normal">
-                          {acc.IdGroup == 1
-                            ? 'Quản trị'
-                            : acc.IdGroup == 3
-                            ? 'Nhân viên'
-                            : 'Người dùng'}
-                        </p>                     
-                         </td>
-                      <td className="border-bottom-0 text-center">
-                        <p className="mb-0 fw-normal">{acc.CustomerId}</p>
-                      </td>
-                      <td className="border-bottom-0">
-                      <div className="d-flex gap-3 justify-content-center">
-                        <Link  to={`/privatesite/accountmanagement/${acc.AccountId}`}
-                          state={{ account: acc }} className="btn btn-primary btn-sm">
-                          Chi tiết
-                        </Link>
-                        <button
-                          className="btn btn-danger btn-sm"
-                          onClick={() => handleDelete(acc.AccountId)}
-                        >
-                          Xóa
-                        </button>
-                      </div>
-                      </td>
-                    </tr>
-                  ))}
+                    {Array.isArray(accounts) &&
+                      accounts.map((acc) => (
+                        <tr key={acc.AccountId}>
+                          <td className="border-bottom-0 text-center">
+                            <h6 className="fw-600 mb-0">{acc.AccountId}</h6>
+                          </td>
+                          <td className="border-bottom-0 text-center">
+                            <h6 className="fw-600 mb-1">{acc.Username}</h6>
+                          </td>
+                          <td className="border-bottom-0 text-center">
+                            <p className="mb-0 fw-normal">{acc.Email}</p>
+                          </td>
+                          <td className="border-bottom-0 text-center">
+                            <p className="mb-0 fw-normal">
+                              {acc.IdGroup == 1
+                                ? "Quản trị"
+                                : acc.IdGroup == 3
+                                ? "Nhân viên"
+                                : "Người dùng"}
+                            </p>
+                          </td>
+                          <td className="border-bottom-0 text-center">
+                            <p className="mb-0 fw-normal">{acc.CustomerId}</p>
+                          </td>
+                          <td className="border-bottom-0">
+                            <div className="d-flex gap-3 justify-content-center">
+                              <Link
+                                to={`/privatesite/accountmanagement/${acc.AccountId}`}
+                                state={{ account: acc }}
+                                className="btn btn-primary btn-sm"
+                              >
+                                Chi tiết
+                              </Link>
+                              <button
+                                className="btn btn-danger btn-sm"
+                                onClick={() => handleDelete(acc.AccountId)}
+                              >
+                                Xóa
+                              </button>
+                            </div>
+                          </td>
+                        </tr>
+                      ))}
                   </tbody>
                 </table>
               </div>

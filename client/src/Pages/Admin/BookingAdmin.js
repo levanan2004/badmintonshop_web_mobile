@@ -10,20 +10,24 @@ const statusBadge = (status) => {
 
 const BookingAdmin = () => {
   const [bookings, setBookings] = useState([]);
-  const [search, setSearch] = useState('');
+  const [search, setSearch] = useState("");
   const [filteredBookings, setFilteredBookings] = useState([]);
   const token = localStorage.getItem("token");
 
   // Lấy danh sách booking
   useEffect(() => {
-    fetch("http://localhost:3000/privatesite/all-bookings", {
+    fetch(`${API_CONFIG.SERVER_URL}/privatesite/all-bookings`, {
       headers: {
-        Authorization: `Bearer ${token}`
-      }
+        Authorization: `Bearer ${token}`,
+      },
     })
-      .then(res => res.json())
-      .then(data => {
-        let arr = Array.isArray(data) ? data : (Array.isArray(data.bookings) ? data.bookings : []);
+      .then((res) => res.json())
+      .then((data) => {
+        let arr = Array.isArray(data)
+          ? data
+          : Array.isArray(data.bookings)
+          ? data.bookings
+          : [];
         setBookings(arr);
         setFilteredBookings(arr);
       })
@@ -36,7 +40,7 @@ const BookingAdmin = () => {
   // Tìm kiếm theo BookingId
   const handleSearchSubmit = (e) => {
     e.preventDefault();
-    const filtered = bookings.filter(b =>
+    const filtered = bookings.filter((b) =>
       b.BookingId.toString().includes(search)
     );
     setFilteredBookings(filtered);
@@ -44,21 +48,24 @@ const BookingAdmin = () => {
 
   // Duyệt sân
   const handleApprove = async (bookingId) => {
-    const res = await fetch(`http://localhost:3000/privatesite/approve-booking/${bookingId}`, {
-      method: "PUT",
-      headers: {
-        Authorization: `Bearer ${token}`
+    const res = await fetch(
+      `${API_CONFIG.SERVER_URL}/privatesite/approve-booking/${bookingId}`,
+      {
+        method: "PUT",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
       }
-    });
+    );
     const data = await res.json();
     if (res.ok) {
-      setBookings(bookings =>
-        bookings.map(b =>
+      setBookings((bookings) =>
+        bookings.map((b) =>
           b.BookingId === bookingId ? { ...b, Status: "Thành công" } : b
         )
       );
-      setFilteredBookings(filteredBookings =>
-        filteredBookings.map(b =>
+      setFilteredBookings((filteredBookings) =>
+        filteredBookings.map((b) =>
           b.BookingId === bookingId ? { ...b, Status: "Thành công" } : b
         )
       );
@@ -70,21 +77,24 @@ const BookingAdmin = () => {
 
   // Hủy sân
   const handleCancel = async (bookingId) => {
-    const res = await fetch(`http://localhost:3000/privatesite/cancel-booking/${bookingId}`, {
-      method: "PUT",
-      headers: {
-        Authorization: `Bearer ${token}`
+    const res = await fetch(
+      `${API_CONFIG.SERVER_URL}/privatesite/cancel-booking/${bookingId}`,
+      {
+        method: "PUT",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
       }
-    });
+    );
     const data = await res.json();
     if (res.ok) {
-      setBookings(bookings =>
-        bookings.map(b =>
+      setBookings((bookings) =>
+        bookings.map((b) =>
           b.BookingId === bookingId ? { ...b, Status: "Đã hủy" } : b
         )
       );
-      setFilteredBookings(filteredBookings =>
-        filteredBookings.map(b =>
+      setFilteredBookings((filteredBookings) =>
+        filteredBookings.map((b) =>
           b.BookingId === bookingId ? { ...b, Status: "Đã hủy" } : b
         )
       );
@@ -97,41 +107,54 @@ const BookingAdmin = () => {
   // Thêm hàm xử lý xóa booking
   const handleDelete = async (bookingId) => {
     const result = await Swal.fire({
-      title: 'Bạn có chắc muốn xóa đặt sân này?',
+      title: "Bạn có chắc muốn xóa đặt sân này?",
       text: "Hành động này không thể hoàn tác!",
-      icon: 'warning',
+      icon: "warning",
       showCancelButton: true,
-      confirmButtonColor: '#d33',
-      cancelButtonColor: '#3085d6',
-      confirmButtonText: 'Xóa',
-      cancelButtonText: 'Hủy'
+      confirmButtonColor: "#d33",
+      cancelButtonColor: "#3085d6",
+      confirmButtonText: "Xóa",
+      cancelButtonText: "Hủy",
     });
 
     if (!result.isConfirmed) return;
 
-    const res = await fetch(`http://localhost:3000/privatesite/delete-booking/${bookingId}`, {
-      method: "DELETE",
-      headers: {
-        Authorization: `Bearer ${token}`
+    const res = await fetch(
+      `${API_CONFIG.SERVER_URL}/privatesite/delete-booking/${bookingId}`,
+      {
+        method: "DELETE",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
       }
-    });
+    );
     const data = await res.json();
     if (res.ok) {
-      setBookings(bookings => bookings.filter(b => b.BookingId !== bookingId));
-      setFilteredBookings(filteredBookings => filteredBookings.filter(b => b.BookingId !== bookingId));
-      Swal.fire("Đã xóa!", data.message || "Xóa đặt sân thành công!", "success");
+      setBookings((bookings) =>
+        bookings.filter((b) => b.BookingId !== bookingId)
+      );
+      setFilteredBookings((filteredBookings) =>
+        filteredBookings.filter((b) => b.BookingId !== bookingId)
+      );
+      Swal.fire(
+        "Đã xóa!",
+        data.message || "Xóa đặt sân thành công!",
+        "success"
+      );
     } else {
       Swal.fire("Lỗi", data.message || "Không thể xóa đặt sân!", "error");
     }
   };
 
   // Sắp xếp theo ngày mới nhất và BookingId giảm dần
-  const sortedBookings = Array.isArray(filteredBookings) ? filteredBookings.slice().sort((a, b) => {
-    if (a.BookingDate !== b.BookingDate) {
-      return b.BookingDate.localeCompare(a.BookingDate);
-    }
-    return b.BookingId - a.BookingId;
-  }) : [];
+  const sortedBookings = Array.isArray(filteredBookings)
+    ? filteredBookings.slice().sort((a, b) => {
+        if (a.BookingDate !== b.BookingDate) {
+          return b.BookingDate.localeCompare(a.BookingDate);
+        }
+        return b.BookingId - a.BookingId;
+      })
+    : [];
 
   return (
     <div className="container-fluid">
@@ -163,14 +186,30 @@ const BookingAdmin = () => {
                 <table className="table table-post text-nowrap mb-0 align-middle">
                   <thead className="text-dark fs-4">
                     <tr>
-                      <th className='text-center'><h6 className="fw-600 mb-0">Mã đặt sân</h6></th>
-                      <th className='text-center'><h6 className="fw-600 mb-0">Khách hàng</h6></th>
-                      <th className='text-center'><h6 className="fw-600 mb-0">Số điện thoại</h6></th>
-                      <th className='text-center'><h6 className="fw-600 mb-0">Sân</h6></th>
-                      <th className='text-center'><h6 className="fw-600 mb-0">Khung giờ</h6></th>
-                      <th className='text-center'><h6 className="fw-600 mb-0">Ngày</h6></th>
-                      <th className='text-center'><h6 className="fw-600 mb-0">Trạng thái</h6></th>
-                      <th className='text-center'><h6 className="fw-600 mb-0">Lệnh</h6></th>
+                      <th className="text-center">
+                        <h6 className="fw-600 mb-0">Mã đặt sân</h6>
+                      </th>
+                      <th className="text-center">
+                        <h6 className="fw-600 mb-0">Khách hàng</h6>
+                      </th>
+                      <th className="text-center">
+                        <h6 className="fw-600 mb-0">Số điện thoại</h6>
+                      </th>
+                      <th className="text-center">
+                        <h6 className="fw-600 mb-0">Sân</h6>
+                      </th>
+                      <th className="text-center">
+                        <h6 className="fw-600 mb-0">Khung giờ</h6>
+                      </th>
+                      <th className="text-center">
+                        <h6 className="fw-600 mb-0">Ngày</h6>
+                      </th>
+                      <th className="text-center">
+                        <h6 className="fw-600 mb-0">Trạng thái</h6>
+                      </th>
+                      <th className="text-center">
+                        <h6 className="fw-600 mb-0">Lệnh</h6>
+                      </th>
                     </tr>
                   </thead>
                   <tbody>
@@ -180,13 +219,17 @@ const BookingAdmin = () => {
                           <h6 className="fw-600 mb-0">{b.BookingId}</h6>
                         </td>
                         <td className="border-bottom-0 text-center">
-                          <h6 className="fw-600 mb-1">{b.CustomerName || b.CustomerId}</h6>
+                          <h6 className="fw-600 mb-1">
+                            {b.CustomerName || b.CustomerId}
+                          </h6>
                         </td>
                         <td className="border-bottom-0 text-center">
                           <h6 className="fw-600 mb-1">{b.Mobile}</h6>
                         </td>
                         <td className="border-bottom-0 text-center">
-                          <h6 className="fw-600 mb-1">{b.CourtName || b.CourtId}</h6>
+                          <h6 className="fw-600 mb-1">
+                            {b.CourtName || b.CourtId}
+                          </h6>
                           <div className="text-muted" style={{ fontSize: 13 }}>
                             {b.BranchName && <span>({b.BranchName})</span>}
                           </div>
@@ -194,7 +237,10 @@ const BookingAdmin = () => {
                         <td className="border-bottom-0 text-center">
                           <h6 className="fw-600 mb-1">
                             {b.StartTime && b.EndTime
-                              ? `${b.StartTime.slice(0,5)} - ${b.EndTime.slice(0,5)}`
+                              ? `${b.StartTime.slice(0, 5)} - ${b.EndTime.slice(
+                                  0,
+                                  5
+                                )}`
                               : b.TimeSlotId}
                           </h6>
                         </td>
@@ -203,7 +249,11 @@ const BookingAdmin = () => {
                         </td>
                         <td className="border-bottom-0 text-center">
                           <div className="d-flex align-items-center justify-content-center gap-2">
-                            <span className={`badge rounded-3 fw-600 ${statusBadge(b.Status)}`}>
+                            <span
+                              className={`badge rounded-3 fw-600 ${statusBadge(
+                                b.Status
+                              )}`}
+                            >
                               {b.Status}
                             </span>
                           </div>

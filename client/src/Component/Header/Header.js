@@ -1,9 +1,15 @@
 import React, { useState, useRef, useEffect } from "react";
 import "./Header.css";
-import { FaSearch, FaShoppingCart, FaUserCircle, FaChevronDown } from "react-icons/fa";
+import {
+  FaSearch,
+  FaShoppingCart,
+  FaUserCircle,
+  FaChevronDown,
+} from "react-icons/fa";
 import { Link, useNavigate } from "react-router-dom";
+import { API_CONFIG } from "../../config/api";
 import { FaRegUser } from "react-icons/fa";
-const {decodeJWT} = require('../../Pages/Common')
+const { decodeJWT } = require("../../Pages/Common");
 
 const Header = () => {
   const [searchOpen, setSearchOpen] = useState(false);
@@ -21,7 +27,7 @@ const Header = () => {
   const [debounceTimer, setDebounceTimer] = useState(null);
   const [categories, setCategories] = useState([]);
   const [brands, setBrands] = useState([]);
-  const navigate = useNavigate(); 
+  const navigate = useNavigate();
   const searchRef = useRef(null);
   const dropdownRef = useRef(null);
   const userDropdownRef = useRef(null);
@@ -39,7 +45,9 @@ const Header = () => {
   const fetchSearchResults = async (query) => {
     setIsLoading(true);
     try {
-      const response = await fetch(`http://localhost:3000/products/search?q=${query}`);
+      const response = await fetch(
+        `${API_CONFIG.SERVER_URL}/products/search?q=${query}`
+      );
       if (response.ok) {
         const data = await response.json();
         setSearchResults(data);
@@ -74,43 +82,37 @@ const Header = () => {
     if (token) {
       setIsLoggedIn(true);
       const decodedToken = decodeJWT(token);
-      setIdGroup(decodedToken.idgroup)
+      setIdGroup(decodedToken.idgroup);
       // console.log(decodedToken.idgroup)
-      setUsername(localStorage.getItem("username")); 
+      setUsername(localStorage.getItem("username"));
     }
 
-    const cart = JSON.parse(localStorage.getItem('cart')) || [];
+    const cart = JSON.parse(localStorage.getItem("cart")) || [];
     setCartItems(cart);
   }, []);
 
   useEffect(() => {
-    fetch("http://localhost:3000/categories")
-      .then(res => res.json())
-      .then(data => setCategories(data))
+    fetch(`${API_CONFIG.SERVER_URL}/categories`)
+      .then((res) => res.json())
+      .then((data) => setCategories(data))
       .catch(() => setCategories([]));
 
-    fetch("http://localhost:3000/brands")
-      .then(res => res.json())
-      .then(data => setBrands(data))
+    fetch(`${API_CONFIG.SERVER_URL}/brands`)
+      .then((res) => res.json())
+      .then((data) => setBrands(data))
       .catch(() => setBrands([]));
   }, []);
 
   // Đóng search và dropdown khi click ra ngoài
   useEffect(() => {
     function handleClickOutside(event) {
-      if (
-        searchRef.current &&
-        !searchRef.current.contains(event.target)
-      ) {
+      if (searchRef.current && !searchRef.current.contains(event.target)) {
         setSearchOpen(false);
         setFocused(false);
-        setSearch("");          
-        setSearchResults([]);    
+        setSearch("");
+        setSearchResults([]);
       }
-      if (
-        dropdownRef.current &&
-        !dropdownRef.current.contains(event.target)
-      ) {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
         setProductDropdown(false);
         setHoveredType(null);
       }
@@ -133,34 +135,44 @@ const Header = () => {
   }, []);
 
   const filteredSuggestions = searchResults;
-  
-const handleViewDetails = (productId) => {
+
+  const handleViewDetails = (productId) => {
     setSearchOpen(false);
-    setSearch(""); 
-    setSearchResults([]); 
+    setSearch("");
+    setSearchResults([]);
     navigate(`/products/productdetails/${productId}`);
   };
   return (
     <header className="modern-header">
       <div className="header-logo">
-        <Link to="/home" >
-        <img src="Images/AT.png" alt="Logo" className="logo-img" />
-        <span className="logo-text">AT BADMINTON</span>
+        <Link to="/home">
+          <img src="Images/AT.png" alt="Logo" className="logo-img" />
+          <span className="logo-text">AT BADMINTON</span>
         </Link>
       </div>
       <nav className="header-nav">
         <ul>
-          <li><Link to="/home"><a href="#">Home</a></Link></li>
+          <li>
+            <Link to="/home">
+              <a href="#">Home</a>
+            </Link>
+          </li>
           <li
             className="dropdown-parent"
             ref={dropdownRef}
             onMouseEnter={() => setProductDropdown(true)}
-            onMouseLeave={() => { setProductDropdown(false); setHoveredType(null); }}
+            onMouseLeave={() => {
+              setProductDropdown(false);
+              setHoveredType(null);
+            }}
           >
             <Link
               to="/allproducts"
               className=""
-              onClick={() => { setProductDropdown(false); setHoveredType(null); }}
+              onClick={() => {
+                setProductDropdown(false);
+                setHoveredType(null);
+              }}
               style={{ display: "block", width: "100%" }}
             >
               Products
@@ -171,7 +183,9 @@ const handleViewDetails = (productId) => {
                   <Link
                     key={cat.CategoryId}
                     to={`/allproducts?category=${cat.CategoryId}`}
-                    className={`dropdown-level1-item${hoveredType === idx ? " active" : ""}`}
+                    className={`dropdown-level1-item${
+                      hoveredType === idx ? " active" : ""
+                    }`}
                     onMouseEnter={() => setHoveredType(idx)}
                     style={{ display: "block" }}
                   >
@@ -181,11 +195,17 @@ const handleViewDetails = (productId) => {
               </div>
               {hoveredType !== null && categories[hoveredType] && (
                 <div className="dropdown-level2">
-                  <div className="dropdown-level2-title">{categories[hoveredType].CategoryName}</div>
+                  <div className="dropdown-level2-title">
+                    {categories[hoveredType].CategoryName}
+                  </div>
                   <ul className="dropdown-level2-list">
                     {brands
-                      .filter(brand => brand.CategoryId === categories[hoveredType].CategoryId)
-                      .map(brand => (
+                      .filter(
+                        (brand) =>
+                          brand.CategoryId ===
+                          categories[hoveredType].CategoryId
+                      )
+                      .map((brand) => (
                         <li key={brand.BrandId}>
                           <Link
                             to={`/allproducts?category=${categories[hoveredType].CategoryId}&brand=${brand.BrandId}`}
@@ -199,9 +219,16 @@ const handleViewDetails = (productId) => {
               )}
             </div>
           </li>
-          <li><Link to="/aboutus"><a href="#">About Us</a></Link></li>
-          <li><Link to="/booking"><a href="#">Đặt sân</a></Link></li>
-
+          <li>
+            <Link to="/aboutus">
+              <a href="#">About Us</a>
+            </Link>
+          </li>
+          <li>
+            <Link to="/booking">
+              <a href="#">Đặt sân</a>
+            </Link>
+          </li>
         </ul>
       </nav>
       <div className="header-actions">
@@ -230,18 +257,24 @@ const handleViewDetails = (productId) => {
                         style={{ cursor: "pointer" }}
                       >
                         <img
-                          src={`http://localhost:3000/uploads/${item.Avatar}`}
+                          src={`${API_CONFIG.UPLOADS_URL}/uploads/${item.Avatar}`}
                           alt={item.ProductName}
                           className="suggestion-product-img"
                         />
                         <div className="suggestion-product-info">
-                          <div className="suggestion-product-name">{item.ProductName}</div>
-                          <div className="suggestion-product-price">{Number(item.Price).toLocaleString()} VNĐ</div>
+                          <div className="suggestion-product-name">
+                            {item.ProductName}
+                          </div>
+                          <div className="suggestion-product-price">
+                            {Number(item.Price).toLocaleString()} VNĐ
+                          </div>
                         </div>
                       </li>
                     ))
                   ) : (
-                    <li className="suggestion-no-result">Không tìm thấy sản phẩm phù hợp.</li>
+                    <li className="suggestion-no-result">
+                      Không tìm thấy sản phẩm phù hợp.
+                    </li>
                   )}
                 </ul>
               )}
@@ -256,16 +289,16 @@ const handleViewDetails = (productId) => {
           </button>
         </div>
         <Link to="/cart">
-         <button className="icon-btn" aria-label="Cart">
-          <FaShoppingCart />
-        </button>
-        </Link>       
+          <button className="icon-btn" aria-label="Cart">
+            <FaShoppingCart />
+          </button>
+        </Link>
         <div className="user-dropdown-container" ref={userDropdownRef}>
           {!isLoggedIn ? (
             <button
               className="icon-btn"
               aria-label="Profile"
-              onClick={() => window.location.href = "/Login"}
+              onClick={() => (window.location.href = "/Login")}
             >
               <FaRegUser />
             </button>
@@ -275,34 +308,44 @@ const handleViewDetails = (productId) => {
               onClick={() => setUserDropdownOpen((v) => !v)}
               tabIndex={0}
             >
-              <img src="/Images/user2.png" alt="User Avatar" className="user-avatar-img" />
+              <img
+                src="/Images/user2.png"
+                alt="User Avatar"
+                className="user-avatar-img"
+              />
               <span className="username">{username}</span>
               <FaChevronDown style={{ marginLeft: 4, fontSize: 13 }} />
               {userDropdownOpen && (
-              <div className="user-dropdown-menu">
-                <ul>
-                  {(idGroup === 1 || idGroup === 3) ? ( // Cho cả admin và nhân viên
-                    <>
-                      <li>
-                        <Link to="/Privatesite/Dashboard">Trang quản trị</Link>
-                      </li>
-                      <li>
-                        <a href="#" onClick={handleLogout}>Logout</a>
-                      </li>
-                    </>
-                  ) : (
-                    <>
-                      <li>
-                        <Link to="/UserProfile">Thông tin</Link>
-                      </li>
-                      <li>
-                        <a href="#" onClick={handleLogout}>Logout</a>
-                      </li>
-                    </>
-                  )}
-                </ul>
-              </div>
-            )}
+                <div className="user-dropdown-menu">
+                  <ul>
+                    {idGroup === 1 || idGroup === 3 ? ( // Cho cả admin và nhân viên
+                      <>
+                        <li>
+                          <Link to="/Privatesite/Dashboard">
+                            Trang quản trị
+                          </Link>
+                        </li>
+                        <li>
+                          <a href="#" onClick={handleLogout}>
+                            Logout
+                          </a>
+                        </li>
+                      </>
+                    ) : (
+                      <>
+                        <li>
+                          <Link to="/UserProfile">Thông tin</Link>
+                        </li>
+                        <li>
+                          <a href="#" onClick={handleLogout}>
+                            Logout
+                          </a>
+                        </li>
+                      </>
+                    )}
+                  </ul>
+                </div>
+              )}
             </div>
           )}
         </div>
