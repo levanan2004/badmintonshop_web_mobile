@@ -13,6 +13,7 @@ const Category = sequelize.define('Category', {
   },
 }, {
   tableName: 'category',
+  freezeTableName: true,
   timestamps: false,
 });
 

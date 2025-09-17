@@ -18,6 +18,7 @@ const Court = sequelize.define('Court', {
     }
 }, {
     tableName: 'court',
+    freezeTableName: true,
     timestamps: false,
 });
 

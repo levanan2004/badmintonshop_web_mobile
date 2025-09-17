@@ -7,6 +7,7 @@ const TimeSlot = sequelize.define('TimeSlot', {
   EndTime: { type: DataTypes.TIME, allowNull: false }
 }, {
   tableName: 'timeslot',
+  freezeTableName: true,
   timestamps: false
 });
 

@@ -36,7 +36,8 @@ const Product = require('./Product');
     },
   },
   {
-    tableName: 'OrderDetail',
+    tableName: 'orderdetail',
+    freezeTableName: true,
     timestamps: false,
 }
 );

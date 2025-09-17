@@ -21,7 +21,8 @@ const Brand = sequelize.define('Brand', {
         }
     }
 }, {
-    tableName: 'Brand',
+    tableName: 'brand',
+    freezeTableName: true,
     timestamps: false,
 });
 

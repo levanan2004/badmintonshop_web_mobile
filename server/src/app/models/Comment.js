@@ -32,7 +32,8 @@ const Comment = sequelize.define('Comment', {
   },
 }, {
   tableName: 'comments',
-  timestamps: true, // vẫn để true
+  freezeTableName: true,
+  timestamps: false, // vẫn để true
 });
 
 Comment.belongsTo(Account, { foreignKey: 'AccountId' });

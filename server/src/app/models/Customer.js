@@ -29,6 +29,7 @@ const Customer = sequelize.define('Customer', {
     },
 }, {
     tableName: 'customer',
+    freezeTableName: true,
     timestamps: false,
 });
 

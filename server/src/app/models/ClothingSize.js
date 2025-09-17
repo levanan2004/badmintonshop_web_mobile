@@ -22,6 +22,7 @@ const ClothingSize = sequelize.define('ClothingSize', {
     },
 }, {
     tableName: 'clothingsize',
+    freezeTableName: true,
     timestamps: false,
 });
 

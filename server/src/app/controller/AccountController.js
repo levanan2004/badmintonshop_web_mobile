@@ -2,6 +2,8 @@ const Account = require('../models/Account');
 const jwt = require('jsonwebtoken');
 const SECRET_KEY = 'saddasdasadsasdadsas'; 
 const bcrypt = require('bcrypt')
+const CommentReply = require('../models/CommentReply'); // Import model comment_reply nếu có
+const Comment = require('../models/Comment'); // Import model Comment nếu có
 
 // Hàm kiểm tra token, trả về user nếu hợp lệ, trả về lỗi nếu không
 async function verifyToken(req, res) {
@@ -243,9 +245,16 @@ exports.deleteAccount = async (req, res) => {
             return res.status(404).json({ message: "Tài khoản không tìm thấy." });
         }
 
+        // Xóa tất cả comment_reply liên quan đến tài khoản này
+        await CommentReply.destroy({ where: { AccountId: id } });
+
+        // Xóa tất cả comments liên quan đến tài khoản này
+        await Comment.destroy({ where: { AccountId: id } });
+
         await account.destroy();
         return res.json({ message: "Xóa tài khoản thành công!" });
     } catch (error) {
+        console.error("Lỗi khi xóa tài khoản:", error);
         return res.status(500).json({ error: error.message });
     }
 };

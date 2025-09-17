@@ -13,6 +13,7 @@ const GroupAccount = sequelize.define('GroupAccount', {
     },
 }, {
     tableName: 'groupaccount',
+    freezeTableName: true,
     timestamps: false,
 });
 

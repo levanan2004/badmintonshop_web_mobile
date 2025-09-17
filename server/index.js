@@ -7,11 +7,24 @@ const path = require("path");
 
 const app = express();
 const PORT = process.env.PORT || 3000;
+const ALLOWED_ORIGINS = [
+  process.env.CLIENT_ORIGIN,         // ví dụ: http://kientienonline.site
+  process.env.API_CLIENT,            // ví dụ: http://202.92.6.72:3001 (nếu có)
+  "http://kientienonline.site",
+  "https://kientienonline.site",
+  "http://202.92.6.72",
+  "http://202.92.6.72:3001",
+  "http://localhost:3001"
+].filter(Boolean);
 
 app.use(
   cors({
-    origin: process.env.API_CLIENT || "http://localhost:3001",
     credentials: true,
+    origin: (origin, cb) => {
+      // Cho phép request không có Origin (curl, Postman) hoặc Origin thuộc whitelist
+      if (!origin || ALLOWED_ORIGINS.includes(origin)) return cb(null, true);
+      cb(new Error(`CORS blocked: ${origin}`));
+    },
   })
 );
 app.use(express.json());
@@ -119,9 +132,5 @@ app.get(
 );
 
 app.listen(PORT, () => {
-  console.log(
-    `🚀 Server đang chạy tại ${
-      process.env.API_SERVER || `http://localhost:${PORT}`
-    } hẹ hẹ`
-  );
+  console.log(`🚀 Server listen on 127.0.0.1:${PORT} (proxy qua /api)`);
 });

@@ -12,7 +12,8 @@ const Branch = sequelize.define('Branch', {
         allowNull: false,
     },
 }, {
-    tableName: 'Branch',
+    tableName: 'branch',
+    freezeTableName: true,
     timestamps: false,
 });
 

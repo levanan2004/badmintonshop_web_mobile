@@ -44,6 +44,7 @@ const VnpayTransaction = sequelize.define(
   },
   {
     tableName: "vnpay_transaction",
+    freezeTableName: true,
     timestamps: false,
   }
 );

@@ -33,6 +33,7 @@ const Booking = sequelize.define('Booking', {
   },
 }, {
   tableName: 'booking',
+  freezeTableName: true,
   timestamps: false,
 });
 

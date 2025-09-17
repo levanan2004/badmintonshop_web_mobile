@@ -22,6 +22,7 @@ const Specification = sequelize.define('Specification', {
     },
 }, {
     tableName: 'specification',
+    freezeTableName: true,
     timestamps: false,
 });
 

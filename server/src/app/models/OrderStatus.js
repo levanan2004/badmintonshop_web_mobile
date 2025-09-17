@@ -13,6 +13,7 @@ const OrderStatus = sequelize.define('OrderStatus', {
     },
 }, {
     tableName: 'orderstatus',
+    freezeTableName: true,
     timestamps: false,
 });
 

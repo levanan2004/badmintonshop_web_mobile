@@ -42,8 +42,9 @@ const Product = sequelize.define('Product', {
         allowNull: true,
     },
 }, {
-    tableName: 'Product',
+    tableName: 'product',
     timestamps: false,
+    freezeTableName: true,
 });
 
 // Thiết lập mối quan hệ

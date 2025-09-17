@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import {
   BrowserRouter,
   Route,
@@ -29,8 +29,9 @@ import CommentManagement from "../Pages/Admin/CommentManagement";
 const { decodeJWT } = require("../../src/Pages/Common");
 
 function handleLogout() {
-  localStorage.removeItem("token"); // Xóa token khỏi localStorage
-  window.location.href = "/login"; // Chuyển hướng đến trang đăng nhập
+  localStorage.removeItem("token");
+  localStorage.removeItem("username");
+  window.location.href = "/Login"; // Đúng route đăng nhập frontend của bạn
 }
 
 const AdminLayout = () => {
@@ -38,7 +39,7 @@ const AdminLayout = () => {
 
   useEffect(() => {
     // Kiểm tra quyền truy cập của người dùng
-    // Nếu không có token hoặc không phải là admin hoặc nhân viên, chuyển hướng đến trang notfound
+    // Nếu không có token hoặc không phải là admin, chuyển hướng đến trang notfound
     const token = localStorage.getItem("token");
     let idGroup = null;
     if (token) {
@@ -49,8 +50,8 @@ const AdminLayout = () => {
         idGroup = null;
       }
     }
-    // Chỉ cho phép admin (1) hoặc nhân viên (3)
-    if (!token || (idGroup !== 1 && idGroup !== 3)) {
+    //trang notfound
+    if (!token || idGroup !== 1) {
       navigate("/notfound");
     }
   }, [navigate]);
@@ -197,6 +198,20 @@ const AdminLayout = () => {
     );
   };
   const Header = () => {
+    const [dropdownOpen, setDropdownOpen] = useState(false);
+
+    // Đóng dropdown khi click ra ngoài
+    React.useEffect(() => {
+      const handleClickOutside = (e) => {
+        if (!e.target.closest(".user-dropdown")) setDropdownOpen(false);
+      };
+      if (dropdownOpen) {
+        document.addEventListener("mousedown", handleClickOutside);
+      }
+      return () =>
+        document.removeEventListener("mousedown", handleClickOutside);
+    }, [dropdownOpen]);
+
     return (
       <header className="app-header">
         <nav className="navbar navbar-expand-lg navbar-light">
@@ -216,14 +231,19 @@ const AdminLayout = () => {
             id="navbarNav"
           >
             <ul className="navbar-nav flex-row ms-auto align-items-center justify-content-end">
-              <li className="nav-item dropdown">
+              <li
+                className="nav-item dropdown user-dropdown"
+                style={{ position: "relative" }}
+              >
                 <a
                   href="#"
                   className="nav-link nav-icon-hover"
                   id="drop2"
-                  data-bs-toggle="dropdown"
-                  aria-expanded="false"
-                  onClick={(e) => e.preventDefault()} // Ngăn chặn hành động mặc định
+                  aria-expanded={dropdownOpen}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    setDropdownOpen((open) => !open);
+                  }}
                 >
                   <img
                     src="https://static.vecteezy.com/system/resources/previews/005/544/718/non_2x/profile-icon-design-free-vector.jpg"
@@ -231,31 +251,32 @@ const AdminLayout = () => {
                     width="35"
                     height="35"
                     className="rounded-circle"
+                    style={{ cursor: "pointer" }}
                   />
                 </a>
-                <ul
-                  className="dropdown-menu dropdown-menu-end"
-                  aria-labelledby="drop2"
-                >
-                  <li>
-                    <Link
-                      to="/privatesite/profile"
-                      className="d-flex align-items-center gap-2 dropdown-item"
-                    >
-                      <i className="ti ti-user fs-6"></i>
-                      <p className="mb-0">Thông tin</p>
-                    </Link>
-                  </li>
-                  <li>
-                    <a
-                      href="#"
-                      onClick={handleLogout}
-                      className="btn btn-outline-primary mx-3 mt-2 d-block"
-                    >
-                      Logout
-                    </a>
-                  </li>
-                </ul>
+                {dropdownOpen && (
+                  <ul
+                    className="dropdown-menu dropdown-menu-end show"
+                    aria-labelledby="drop2"
+                    style={{
+                      position: "absolute",
+                      right: 0,
+                      top: "100%",
+                      minWidth: 150,
+                      zIndex: 1000,
+                    }}
+                  >
+                    <li>
+                      <a
+                        href="#"
+                        onClick={handleLogout}
+                        className="dropdown-item text-danger"
+                      >
+                        Logout
+                      </a>
+                    </li>
+                  </ul>
+                )}
               </li>
             </ul>
           </div>

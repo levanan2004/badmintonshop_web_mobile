@@ -18,7 +18,8 @@ const Image = sequelize.define('Image', {
     },
 }, 
 {
-    tableName: 'Image',
+    tableName: 'image',
+    freezeTableName: true,
     timestamps: false,
 });
 Image.belongsTo(Product, { foreignKey: 'ProductId' });

@@ -10,6 +10,7 @@ const CommentReply = sequelize.define('CommentReply', {
   CreatedAt: { type: DataTypes.DATE, defaultValue: DataTypes.NOW, field: 'CreatedAt' }
 }, {
   tableName: 'comment_reply',
+  freezeTableName: true,
   timestamps: false
 });
 

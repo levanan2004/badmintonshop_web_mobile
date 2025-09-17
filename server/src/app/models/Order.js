@@ -55,6 +55,7 @@ const Order = sequelize.define(
   },
   {
     tableName: "order",
+    freezeTableName: true,
     timestamps: false,
   }
 );

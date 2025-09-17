@@ -7,7 +7,7 @@ const API_CLIENT_URL =
 export const API_CONFIG = {
   SERVER_URL: API_SERVER_URL,
   CLIENT_URL: API_CLIENT_URL,
-  UPLOADS_URL: API_CLIENT_URL,
+  UPLOADS_URL: API_SERVER_URL,
   ENDPOINTS: {
     // Auth endpoints
     LOGIN: `${API_SERVER_URL}/auth/login`,
